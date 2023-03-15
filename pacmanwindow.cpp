@@ -98,6 +98,7 @@ void PacmanWindow::keyPressEvent(QKeyEvent *event)
 void PacmanWindow::handleTimer()
 {
     jeu.evolue();
+    jeu.colisionPacman();
     update();
 }
 

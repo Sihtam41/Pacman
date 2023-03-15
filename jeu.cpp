@@ -156,6 +156,24 @@ void Jeu::evolue()
     }
 }
 
+bool Jeu::colisionPacman()
+{
+
+	list<Fantome>::iterator itFantome;
+
+
+    for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
+    {
+        if ((itFantome->posX == posPacmanX) && (itFantome->posY == posPacmanY))
+        {
+            cout<<"colision ";
+            return true;
+        }
+    }
+
+    return false;
+}
+
 int Jeu::getNbCasesX() const
 {
     return largeur;

@@ -64,6 +64,8 @@ class Jeu
     //ajout et retrait de fantomes
     void RetraitFantome();
     void AjoutFantome();
+    //Rrtourne vrai si il y a une colision entre un fantome et pacman, sinon retourne faux
+    bool colisionPacman();
 };
 
 #endif
