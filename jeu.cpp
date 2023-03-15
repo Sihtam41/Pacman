@@ -25,6 +25,7 @@ Jeu::Jeu()
     terrain = nullptr;
     largeur = 0; hauteur = 0;
     posPacmanX = 0; posPacmanY = 0;
+    dirPacman = DROITE;
 }
 
 Jeu::Jeu(const Jeu &jeu):fantomes(jeu.fantomes)
@@ -154,6 +155,8 @@ void Jeu::evolue()
             // Changement de direction
             itFantome->dir = (Direction)(rand()%4);
     }
+
+    deplacePacman(dirPacman);
 }
 
 bool Jeu::colisionPacman()
@@ -200,6 +203,11 @@ Case Jeu::getCase(int x, int y) const
     return terrain[y*largeur+x];
 }
 
+Direction Jeu::getDirPacman() const
+{
+    return dirPacman;
+}
+
 const std::list<Fantome> &Jeu::getFantomes() const
 {
     return fantomes;
@@ -209,7 +217,10 @@ bool Jeu::posValide(int x, int y) const
 {
     return (x>=0 && x<largeur && y>=0 && y<hauteur && terrain[y*largeur+x]==VIDE);
 }
-
+void Jeu::setDirPacman(Direction dir)
+{
+    dirPacman=dir;
+}
 bool Jeu::deplacePacman(Direction dir)
 {
     int depX[] = {-1, 1, 0, 0};

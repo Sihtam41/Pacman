@@ -28,6 +28,7 @@ class Jeu
     Case *terrain;
     int largeur, hauteur; // Nombre de cases en largeur et en hauteur
     int posPacmanX, posPacmanY;
+    Direction dirPacman;
     std::list<Fantome> fantomes;
 
   public:
@@ -48,6 +49,8 @@ class Jeu
     int getPacmanX() const;
     int getPacmanY() const;
 
+    void setDirPacman(Direction);
+
     // Retourne la case à une position donnée
     Case getCase(int, int) const;
 
@@ -60,6 +63,8 @@ class Jeu
 
     // Déplace Pacman dans une direction (si la case à atteindre est valide)
     bool deplacePacman(Direction);
+    //acède à la direction du pacman
+    Direction getDirPacman() const;
 
     //ajout et retrait de fantomes
     void RetraitFantome();

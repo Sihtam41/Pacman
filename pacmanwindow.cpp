@@ -8,14 +8,25 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     // Taille des cases en pixels
     int largeurCase, hauteurCase;
 
+    this->setStyleSheet("background-color: rgb(80, 80, 80);");
 
 
-
-    if (pixmapPacman.load("./data/pacman.bmp")==false)
+    if (pixmapPacman[0].load("./data/pacman1.bmp")==false)
     {
-        cout<<"Impossible d'ouvrir pacman.png"<<endl;
+        cout<<"Impossible d'ouvrir pacman1.png"<<endl;
         exit(-1);
     }
+        if (pixmapPacman[1].load("./data/pacman2.bmp")==false)
+    {
+        cout<<"Impossible d'ouvrir pacman2.png"<<endl;
+        exit(-1);
+    }
+        if (pixmapPacman[2].load("./data/pacman2.bmp")==false)
+    {
+        cout<<"Impossible d'ouvrir pacman1.png"<<endl;
+        exit(-1);
+    }
+    imagePacman = 0;
 
     if (pixmapFantome.load("./data/fantome.bmp")==false)
     {
@@ -33,7 +44,8 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
 
     QTimer *timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &PacmanWindow::handleTimer);
-    timer->start(100);
+    timer->start(150);
+
 
     largeurCase = pixmapMur.width();
     hauteurCase = pixmapMur.height();
@@ -48,7 +60,6 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     connect(btn1, &QPushButton::clicked, this, &PacmanWindow::ajoutFantome);
 
     connect(btn2, &QPushButton::clicked, this, &PacmanWindow::retraitFantome);
-
 
 
     resize(jeu.getNbCasesX()*largeurCase, jeu.getNbCasesY()*(hauteurCase+2));
@@ -78,20 +89,41 @@ void PacmanWindow::paintEvent(QPaintEvent *)
     for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
         painter.drawPixmap(itFantome->getPosX()*largeurCase, (itFantome->getPosY()+1)*hauteurCase, pixmapFantome);
 
-	// Dessine Pacman
-	painter.drawPixmap(jeu.getPacmanX()*largeurCase, (jeu.getPacmanY()+1)*hauteurCase, pixmapPacman);
+    // Dessine Pacman en fonction de la direction:
+    int rot;
+    if (jeu.getDirPacman()==DROITE)
+        rot=0;
+    if(jeu.getDirPacman() == BAS)
+        rot=90;
+    else if(jeu.getDirPacman() == GAUCHE)
+        rot=180;
+    else if(jeu.getDirPacman() == HAUT)
+        rot=270;
+    QMatrix rm;
+    rm.rotate(rot);
+    // rotation de l'image du Pacman
+    QPixmap p = pixmapPacman[imagePacman].transformed(rm);
+
+	painter.drawPixmap(jeu.getPacmanX()*largeurCase, (jeu.getPacmanY()+1)*hauteurCase, p);
+    // prochaine image du pacman
+	imagePacman++;
+	imagePacman%=3;
+
+
+
 }
+
 
 void PacmanWindow::keyPressEvent(QKeyEvent *event)
 {
     if (event->key()==Qt::Key_Left)
-        jeu.deplacePacman(GAUCHE);
+        jeu.setDirPacman(GAUCHE);
     else if (event->key()==Qt::Key_Right)
-        jeu.deplacePacman(DROITE);
+        jeu.setDirPacman(DROITE);
     else if (event->key()==Qt::Key_Up)
-        jeu.deplacePacman(HAUT);
+        jeu.setDirPacman(HAUT);
     else if (event->key()==Qt::Key_Down)
-        jeu.deplacePacman(BAS);
+        jeu.setDirPacman(BAS);
     update();
 }
 
