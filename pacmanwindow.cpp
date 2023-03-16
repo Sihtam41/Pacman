@@ -54,8 +54,11 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
 
     PacmanButton *btn1 = new PacmanButton("Ajout de fantome",this);
     btn1->setGeometry(10,2.5,150,hauteurCase-5);
+    btn1->setStyleSheet("background-color: white");
+        
     PacmanButton *btn2 = new PacmanButton("Retrait de fantome",this);
     btn2->setGeometry(170,2.5,150,hauteurCase-5);
+    btn2->setStyleSheet("background-color: white");
 
     connect(btn1, &QPushButton::clicked, this, &PacmanWindow::ajoutFantome);
 
