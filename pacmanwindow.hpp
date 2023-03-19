@@ -12,6 +12,7 @@ class PacmanWindow : public QFrame
     QPixmap pixmapFantome, pixmapMur;
     QPixmap pixmapPacman [3];
     int imagePacman;
+    int etatJeu;//1 si le jeu est en fonction et 0 si la fin du jeu
 
   public:
     PacmanWindow(QWidget *pParent=0, Qt::WindowFlags flags=Qt::WindowFlags());
@@ -22,6 +23,8 @@ class PacmanWindow : public QFrame
     void keyPressEvent(QKeyEvent *);
     void ajoutFantome();
     void retraitFantome();
+    void finDeJeu();
+    void onGameOver();
 };
 
 class PacmanButton : public QPushButton

@@ -40,6 +40,8 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
         exit(-1);
     }
 
+    etatJeu = 1;
+
     jeu.init();
 
     QTimer *timer = new QTimer(this);
@@ -55,14 +57,20 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     PacmanButton *btn1 = new PacmanButton("Ajout de fantome",this);
     btn1->setGeometry(10,2.5,150,hauteurCase-5);
     btn1->setStyleSheet("background-color: white");
-        
+
     PacmanButton *btn2 = new PacmanButton("Retrait de fantome",this);
     btn2->setGeometry(170,2.5,150,hauteurCase-5);
     btn2->setStyleSheet("background-color: white");
 
+    PacmanButton *btn3 = new PacmanButton("Fin",this);
+    btn3->setGeometry(475,2.5,150,hauteurCase-5);
+    btn3->setStyleSheet("background-color: white");
+
     connect(btn1, &QPushButton::clicked, this, &PacmanWindow::ajoutFantome);
 
     connect(btn2, &QPushButton::clicked, this, &PacmanWindow::retraitFantome);
+
+    connect(btn3, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
 
 
     resize(jeu.getNbCasesX()*largeurCase, jeu.getNbCasesY()*(hauteurCase+2));
@@ -74,43 +82,70 @@ void PacmanWindow::paintEvent(QPaintEvent *)
 
     int x, y;
 
-    // Taille des cases en pixels
-    int largeurCase, hauteurCase;
+        // Taille des cases en pixels
+        int largeurCase, hauteurCase;
 
-    largeurCase = pixmapMur.width();
-    hauteurCase = pixmapMur.height();
+        largeurCase = pixmapMur.width();
+        hauteurCase = pixmapMur.height();
 
-    // Dessine les cases
-    for (y=0;y<jeu.getNbCasesY();y++)
-        for (x=0;x<jeu.getNbCasesX();x++)
-			if (jeu.getCase(x,y)==MUR)
-                painter.drawPixmap(x*largeurCase, (y+1)*hauteurCase, pixmapMur);
+    if (etatJeu==1)
+    {
 
-    // Dessine les fantomes
-    const list<Fantome> &fantomes = jeu.getFantomes();
-    list<Fantome>::const_iterator itFantome;
-    for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
-        painter.drawPixmap(itFantome->getPosX()*largeurCase, (itFantome->getPosY()+1)*hauteurCase, pixmapFantome);
 
-    // Dessine Pacman en fonction de la direction:
-    int rot;
-    if (jeu.getDirPacman()==DROITE)
-        rot=0;
-    if(jeu.getDirPacman() == BAS)
-        rot=90;
-    else if(jeu.getDirPacman() == GAUCHE)
-        rot=180;
-    else if(jeu.getDirPacman() == HAUT)
-        rot=270;
-    QMatrix rm;
-    rm.rotate(rot);
-    // rotation de l'image du Pacman
-    QPixmap p = pixmapPacman[imagePacman].transformed(rm);
+        // Dessine les cases
+        for (y=0;y<jeu.getNbCasesY();y++)
+            for (x=0;x<jeu.getNbCasesX();x++)
+                if (jeu.getCase(x,y)==MUR)
+                    painter.drawPixmap(x*largeurCase, (y+1)*hauteurCase, pixmapMur);
 
-	painter.drawPixmap(jeu.getPacmanX()*largeurCase, (jeu.getPacmanY()+1)*hauteurCase, p);
-    // prochaine image du pacman
-	imagePacman++;
-	imagePacman%=3;
+        // Dessine les fantomes
+        const list<Fantome> &fantomes = jeu.getFantomes();
+        list<Fantome>::const_iterator itFantome;
+        for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
+            painter.drawPixmap(itFantome->getPosX()*largeurCase, (itFantome->getPosY()+1)*hauteurCase, pixmapFantome);
+
+        // Dessine Pacman en fonction de la direction:
+        int rot;
+        if (jeu.getDirPacman()==DROITE)
+            rot=0;
+        if(jeu.getDirPacman() == BAS)
+            rot=90;
+        else if(jeu.getDirPacman() == GAUCHE)
+            rot=180;
+        else if(jeu.getDirPacman() == HAUT)
+            rot=270;
+        QMatrix rm;
+        rm.rotate(rot);
+        // rotation de l'image du Pacman
+        QPixmap p = pixmapPacman[imagePacman].transformed(rm);
+
+        painter.drawPixmap(jeu.getPacmanX()*largeurCase, (jeu.getPacmanY()+1)*hauteurCase, p);
+        // prochaine image du pacman
+        imagePacman++;
+        imagePacman%=3;
+        }
+
+    else if (etatJeu == 0)//affichage fin du jeu
+    {
+        QPixmap p = pixmapPacman[2];
+        for (int i=0;i<jeu.getNbCasesX();i++)
+        {
+            painter.drawPixmap(i*largeurCase, (jeu.getNbCasesY()/4)*hauteurCase, p);
+            painter.drawPixmap(i*largeurCase, (jeu.getNbCasesY()/4)*hauteurCase*4, p);
+        }
+        /*PacmanButton *button = findChild<PacmanButton*>("Fin");
+        button->deleteLater();*/
+
+        //painter.fillRect(rect(), Qt::white);
+
+        painter.setPen(Qt::black);
+        painter.setFont(QFont("Arial", 50));
+        painter.drawText(rect(), Qt::AlignCenter, "Fin du jeu");
+
+        QTimer::singleShot(3000, this, &PacmanWindow::close);
+
+    }
+
 
 
 
@@ -133,8 +168,17 @@ void PacmanWindow::keyPressEvent(QKeyEvent *event)
 void PacmanWindow::handleTimer()
 {
     jeu.evolue();
-    jeu.colisionPacman();
+
+    if (jeu.getFin()==true)
+        finDeJeu();
+
     update();
+}
+
+void PacmanWindow::finDeJeu(){
+
+
+    etatJeu = 0;
 }
 
 void PacmanWindow::ajoutFantome() {

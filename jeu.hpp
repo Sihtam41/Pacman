@@ -29,6 +29,8 @@ class Jeu
     int largeur, hauteur; // Nombre de cases en largeur et en hauteur
     int posPacmanX, posPacmanY;
     Direction dirPacman;
+    bool invincible;
+    bool finJeu;
     std::list<Fantome> fantomes;
 
   public:
@@ -51,6 +53,8 @@ class Jeu
 
     void setDirPacman(Direction);
 
+    bool getFin();
+
     // Retourne la case à une position donnée
     Case getCase(int, int) const;
 
@@ -70,7 +74,7 @@ class Jeu
     void RetraitFantome();
     void AjoutFantome();
     //Rrtourne vrai si il y a une colision entre un fantome et pacman, sinon retourne faux
-    bool colisionPacman();
+    bool colisionPacmanFantome();
 };
 
 #endif

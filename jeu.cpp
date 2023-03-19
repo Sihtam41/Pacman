@@ -26,6 +26,8 @@ Jeu::Jeu()
     largeur = 0; hauteur = 0;
     posPacmanX = 0; posPacmanY = 0;
     dirPacman = DROITE;
+    invincible=true;
+    finJeu=false;
 }
 
 Jeu::Jeu(const Jeu &jeu):fantomes(jeu.fantomes)
@@ -108,7 +110,7 @@ bool Jeu::init()
             else
                 terrain[y*largeur+x] = VIDE;
 
-    fantomes.resize(5);
+    fantomes.resize(4);
 
 	for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
     {
@@ -157,9 +159,12 @@ void Jeu::evolue()
     }
 
     deplacePacman(dirPacman);
-}
 
-bool Jeu::colisionPacman()
+    finJeu=colisionPacmanFantome();
+}
+//Note: les colision ne sont pas parfaite car si le pacman et un fantome se colle et ensuite qu'ils vont tout les deux l'un vers l'autre, alors il n'y a pas de colision
+//idée : voirt les position précédentes du pacman ?
+bool Jeu::colisionPacmanFantome()
 {
 
 	list<Fantome>::iterator itFantome;
@@ -169,8 +174,10 @@ bool Jeu::colisionPacman()
     {
         if ((itFantome->posX == posPacmanX) && (itFantome->posY == posPacmanY))
         {
-            cout<<"colision ";
-            return true;
+            if (invincible==false)
+                return true;
+            else
+                fantomes.erase(itFantome);
         }
     }
 
@@ -221,6 +228,11 @@ void Jeu::setDirPacman(Direction dir)
 {
     dirPacman=dir;
 }
+
+bool Jeu::getFin(){
+    return finJeu;
+}
+
 bool Jeu::deplacePacman(Direction dir)
 {
     int depX[] = {-1, 1, 0, 0};
