@@ -34,7 +34,12 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
         exit(-1);
     }
 
-    if (pixmapMur.load("./data/mur.bmp")==false)
+    if (pixmapMur.load("./data/greystone.png")==false)
+    {
+        cout<<"Impossible d'ouvrir mur.bmp"<<endl;
+        exit(-1);
+    }
+    if (pixmapVide.load("./data/background.bmp")==false)
     {
         cout<<"Impossible d'ouvrir mur.bmp"<<endl;
         exit(-1);
@@ -97,6 +102,8 @@ void PacmanWindow::paintEvent(QPaintEvent *)
             for (x=0;x<jeu.getNbCasesX();x++)
                 if (jeu.getCase(x,y)==MUR)
                     painter.drawPixmap(x*largeurCase, (y+1)*hauteurCase, pixmapMur);
+                else if (jeu.getCase(x,y)==VIDE)
+                    painter.drawPixmap(x*largeurCase, (y+1)*hauteurCase, pixmapVide);
 
         // Dessine les fantomes
         const list<Fantome> &fantomes = jeu.getFantomes();
