@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 #include "jeu.hpp"
 
 using namespace std;
@@ -8,6 +9,7 @@ Fantome::Fantome()
 {
     posX = 0; posY = 0;
     dir = BAS;
+    comportement = OBSERVATEUR;
 }
 
 int Fantome::getPosX() const
@@ -20,14 +22,13 @@ int Fantome::getPosY() const
     return posY;
 }
 
+
 Jeu::Jeu()
 {
     terrain = nullptr;
     largeur = 0; hauteur = 0;
     posPacmanX = 0; posPacmanY = 0;
     dirPacman = DROITE;
-    invincible=true;
-    finJeu=false;
 }
 
 Jeu::Jeu(const Jeu &jeu):fantomes(jeu.fantomes)
@@ -144,7 +145,7 @@ bool Jeu::init()
     };*/
 
 
-	largeur = 21;
+	largeur = 20;
 	hauteur = 15;
 
 	terrain = new Case[largeur*hauteur];
@@ -156,7 +157,7 @@ bool Jeu::init()
             else
                 terrain[y*largeur+x] = VIDE;
 
-    fantomes.resize(4);
+    fantomes.resize(1);//définit le nombre de fantomes au lacement du niveau
 
 	for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
     {
@@ -183,33 +184,182 @@ bool Jeu::init()
 
 void Jeu::evolue()
 {
+
+    ////////////////////////////////Depalcement des fantomes///////////////////////////////
     int testX, testY;
 	list<Fantome>::iterator itFantome;
 
     int depX[] = {-1, 1, 0, 0};
     int depY[] = {0, 0, -1, 1};
 
+    // boucle qui décrit le deplacement futur de fantomes
     for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
     {
-        testX = itFantome->posX + depX[itFantome->dir];
-        testY = itFantome->posY + depY[itFantome->dir];
 
-        if (terrain[testY*largeur+testX]==VIDE)
+        //cout<<"fantomes :x:"<<itFantome->posX<<"y:"<<itFantome->posY<<endl;
+        //cout<<"pacman : x:"<<posPacmanX<<" y:"<<posPacmanY<<endl;
+        bool deplace = false;
+        list<Direction> Dir_test;
+        while (!deplace)
         {
-            itFantome->posX = testX;
-            itFantome->posY = testY;
-        }
-        else
-            // Changement de direction
-            itFantome->dir = (Direction)(rand()%4);
-    }
+                if (itFantome->comportement==ALEATOIRE)// le fantomes va changer de direction de façon aléatoire si il rencontre un mur
+                {
+                    int testX2 = itFantome->posX + depX[itFantome->dir];
+                    int testY2 = itFantome->posY + depY[itFantome->dir];
+                    if (terrain[testY2*largeur+testX2]!=VIDE)//si le fantome ne va pas sur un mur
+                        itFantome->dir = (Direction)(rand()%4);
+                }
 
+                else if (itFantome->comportement==FUYARD)// ne fonctionne pas bien
+                {
+                    auto it_DROITE = find(Dir_test.begin(), Dir_test.end(), DROITE);
+                    auto it_GAUCHE = find(Dir_test.begin(), Dir_test.end(), GAUCHE);
+                    auto it_HAUT = find(Dir_test.begin(), Dir_test.end(), HAUT);
+                    auto it_BAS = find(Dir_test.begin(), Dir_test.end(), BAS);
+                    // Déplacement loin du pacman
+                    if (itFantome->posX<posPacmanX && it_GAUCHE==Dir_test.end())
+                        itFantome->dir = GAUCHE;
+                    else if (itFantome->posX>posPacmanX && it_DROITE==Dir_test.end())
+                        itFantome->dir = DROITE;
+                    else if (itFantome->posY<posPacmanY && it_HAUT==Dir_test.end())
+                        itFantome->dir = HAUT;
+                    else if (itFantome->posY>posPacmanY && it_BAS==Dir_test.end())
+                        itFantome->dir = BAS;
+                    else
+                        itFantome->dir = (Direction)(rand()%4);
+
+                    
+                    Dir_test.push_back(itFantome->dir);
+                }
+                else if (itFantome->comportement==CHASSEUR)// Ne fonctione pas super bien
+                {
+
+                    auto it_DROITE = find(Dir_test.begin(), Dir_test.end(), DROITE);
+                    auto it_GAUCHE = find(Dir_test.begin(), Dir_test.end(), GAUCHE);
+                    auto it_HAUT = find(Dir_test.begin(), Dir_test.end(), HAUT);
+                    auto it_BAS = find(Dir_test.begin(), Dir_test.end(), BAS);
+                    // Déplacement vers le pacman
+                    if (itFantome->posX<posPacmanX && it_DROITE == Dir_test.end())
+                        itFantome->dir = DROITE;
+                    else if (itFantome->posX>posPacmanX && it_GAUCHE == Dir_test.end())
+                        itFantome->dir = GAUCHE;
+                    else if (itFantome->posY<posPacmanY && it_BAS == Dir_test.end())
+                        itFantome->dir = BAS;
+                    else if (itFantome->posY>posPacmanY && it_HAUT == Dir_test.end())
+                        itFantome->dir = HAUT;
+                    else
+                        itFantome->dir = (Direction)(rand()%4);
+
+                    
+                    Dir_test.push_back(itFantome->dir);
+                }
+                else if (itFantome->comportement==OBSERVATEUR)//Fonctionnel
+                {
+                    int x=itFantome->posX;
+                    int y=itFantome->posY;
+                    int Px=posPacmanX;
+                    int Py=posPacmanY;
+
+                    bool PACMAN_VU = false;//Variable qui définit si la pacman a été vu ou pas
+
+                    Direction dirFantomeCourante = itFantome->dir;
+                    //on regarde si le pacman est dans la meme ligne ou colonne que le fantome
+                    if (y==Py )// si le fantome est sur la même ligne que  le Pacman
+                    {
+                        PACMAN_VU = true;
+                        if (x<=Px )// si le fantome est à droite
+                        {
+                            itFantome->dir = DROITE;
+                            for (int i=x; i<Px; i++)// on regarde si il y a un mur entre le fantome est pacman
+                            {
+                                if (getCase(i, y)==MUR)
+                                {
+                                    itFantome->dir = dirFantomeCourante;
+                                    PACMAN_VU = false;//il y a un mur donc le fantome n'a pas vu le pacman
+                                    break;
+                                }
+                            }
+                        }
+                        else if (x>=Px )// si le fantome est à gauche
+                        {
+                            itFantome->dir = GAUCHE;
+                            for (int i=x; i>Px; i--)// on regarde si il y a un mur entre le fantome est pacman
+                            {
+                                if (getCase(i, y)==MUR)
+                                {
+                                    itFantome->dir = dirFantomeCourante;
+                                    PACMAN_VU = false;//il y a un mur donc le fantome n'a pas vu le pacman
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else if (x==Px )// si le fantome est sur la même colonne que  le Pacman
+                    {
+                        PACMAN_VU = true;
+                        if (y<=Py )// si le fantome est en bas
+                        {
+                            itFantome->dir = BAS;
+                            for (int i=y; i<Py; i++)// on regarde si il y a un mur entre le fantome est pacman
+                            {
+                                if (getCase(x, i)==MUR)
+                                {
+                                    itFantome->dir = dirFantomeCourante;
+                                    PACMAN_VU = false;//il y a un mur donc le fantome n'a pas vu le pacman
+                                    break;
+                                }
+                            }
+                        }
+                        else if (y>=Py )// si le fantome est en haut
+                        {
+                            itFantome->dir = HAUT;
+                            for (int i=y; i>Py; i--)// on regarde si il y a un mur entre le fantome est pacman
+                            {
+                                if (getCase(x, i)==MUR)
+                                {
+                                    itFantome->dir = dirFantomeCourante;
+                                    PACMAN_VU = false;//il y a un mur donc le fantome n'a pas vu le pacman
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    else
+                        PACMAN_VU = false;//le fantome n'a pas vu le pacman
+                    
+                    if (PACMAN_VU==false)//Comme le comportenement ALEATOIRE
+                    {
+                        int testX2 = itFantome->posX + depX[itFantome->dir];
+                        int testY2 = itFantome->posY + depY[itFantome->dir];
+                        if (terrain[testY2*largeur+testX2]!=VIDE)//si le fantome ne va pas sur un mur
+                            itFantome->dir = (Direction)(rand()%4);
+                    }
+                        
+                }
+            
+
+            testX = itFantome->posX + depX[itFantome->dir];
+            testY = itFantome->posY + depY[itFantome->dir];
+
+            if (terrain[testY*largeur+testX]==VIDE)//si le fantome ne va pas sur un mur
+            {//alors il se deplace
+                itFantome->posX = testX;
+                itFantome->posY = testY;
+
+                deplace=true;
+            }
+        }
+
+           
+
+    }
+////////////////////////////////////////////////////////////////////////////////////////
     deplacePacman(dirPacman);
 
     finJeu=colisionPacmanFantome();
 }
 //Note: les colision ne sont pas parfaite car si le pacman et un fantome se colle et ensuite qu'ils vont tout les deux l'un vers l'autre, alors il n'y a pas de colision
-//id�e : voirt les position pr�c�dentes du pacman ?
+//id�e : voirt les position pr�c�dentes du pacman ?
 bool Jeu::colisionPacmanFantome()
 {
 

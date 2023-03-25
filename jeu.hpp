@@ -5,6 +5,7 @@
 
 typedef enum {VIDE, MUR} Case;
 typedef enum {GAUCHE, DROITE, HAUT, BAS} Direction;
+typedef enum {FUYARD, CHASSEUR, ALEATOIRE, OBSERVATEUR} EtatFantome;
 
 class Jeu;
 
@@ -15,11 +16,13 @@ class Fantome
   protected:
     int posX, posY;
     Direction dir;
+    EtatFantome comportement;// permet de dÃ©finir diffÃ©rents comportement du fantomes 0=direction alÃ©atoire 1=cherche pacman
 
   public:
     Fantome();
     int getPosX() const;
     int getPosY() const;
+    EtatFantome getComportement() const {return comportement;}
 };
 
 class Jeu
@@ -29,8 +32,8 @@ class Jeu
     int largeur, hauteur; // Nombre de cases en largeur et en hauteur
     int posPacmanX, posPacmanY;
     Direction dirPacman;
-    bool invincible;
-    bool finJeu;
+    bool invincible=true;
+    bool finJeu=false;
     std::list<Fantome> fantomes;
 
   public:
@@ -55,19 +58,19 @@ class Jeu
 
     bool getFin();
 
-    // Retourne la case à une position donnée
+    // Retourne la case ï¿½ une position donnï¿½e
     Case getCase(int, int) const;
 
     // Retourne la liste de fantomes en lecture seule
     const std::list<Fantome> &getFantomes() const;
 
-    // Indique si la case à une position donnée existe et est vide
+    // Indique si la case ï¿½ une position donnï¿½e existe et est vide
     // (Pacman ou les fantomes peuvent l'occuper)
     bool posValide(int, int) const;
 
-    // Déplace Pacman dans une direction (si la case à atteindre est valide)
+    // Dï¿½place Pacman dans une direction (si la case ï¿½ atteindre est valide)
     bool deplacePacman(Direction);
-    //acède à la direction du pacman
+    //acï¿½de ï¿½ la direction du pacman
     Direction getDirPacman() const;
 
     //ajout et retrait de fantomes
