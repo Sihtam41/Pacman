@@ -2,10 +2,11 @@
 #define JEU_HPP
 
 #include <list>
+#include "AStar.hpp"
 
 typedef enum {VIDE, MUR} Case;
 typedef enum {GAUCHE, DROITE, HAUT, BAS} Direction;
-typedef enum {FUYARD, CHASSEUR, ALEATOIRE, OBSERVATEUR} EtatFantome;
+typedef enum {FUYARD, CHASSEUR, ALEATOIRE, OBSERVATEUR, TRAQUEUR} EtatFantome;
 
 class Jeu;
 
@@ -29,6 +30,7 @@ class Jeu
 {
   protected:
     Case *terrain;
+    AStar::Generator generator;
     int largeur, hauteur; // Nombre de cases en largeur et en hauteur
     int posPacmanX, posPacmanY;
     Direction dirPacman;

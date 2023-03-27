@@ -5,45 +5,14 @@ using namespace std;
 
 PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pParent, flags)
 {
+    cout<<"PaetzzeecmanWindow::PacmanWindow"<<endl;
     // Taille des cases en pixels
     int largeurCase, hauteurCase;
 
     this->setStyleSheet("background-color: rgb(80, 80, 80);");
 
-
-    if (pixmapPacman[0].load("./data/pacman1.bmp")==false)
-    {
-        cout<<"Impossible d'ouvrir pacman1.png"<<endl;
-        exit(-1);
-    }
-        if (pixmapPacman[1].load("./data/pacman2.bmp")==false)
-    {
-        cout<<"Impossible d'ouvrir pacman2.png"<<endl;
-        exit(-1);
-    }
-        if (pixmapPacman[2].load("./data/pacman2.bmp")==false)
-    {
-        cout<<"Impossible d'ouvrir pacman1.png"<<endl;
-        exit(-1);
-    }
-    imagePacman = 0;
-
-    if (pixmapFantome.load("./data/fantome.bmp")==false)
-    {
-        cout<<"Impossible d'ouvrir fantome.bmp"<<endl;
-        exit(-1);
-    }
-
-    if (pixmapMur.load("./data/greystone.png")==false)
-    {
-        cout<<"Impossible d'ouvrir mur.bmp"<<endl;
-        exit(-1);
-    }
-    if (pixmapVide.load("./data/background.bmp")==false)
-    {
-        cout<<"Impossible d'ouvrir mur.bmp"<<endl;
-        exit(-1);
-    }
+    initImages();
+    
 
     etatJeu = 1;
 
@@ -109,8 +78,27 @@ void PacmanWindow::paintEvent(QPaintEvent *)
         const list<Fantome> &fantomes = jeu.getFantomes();
         list<Fantome>::const_iterator itFantome;
         for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
-            painter.drawPixmap(itFantome->getPosX()*largeurCase, (itFantome->getPosY()+1)*hauteurCase, pixmapFantome);
-
+        {
+            QPixmap pixmapFanome;
+            switch (itFantome->getComportement())
+            {
+                {
+                case TRAQUEUR:
+                    pixmapFanome= pixmapFantomeRouge;
+                    break;
+                case FUYARD:
+                    pixmapFanome= pixmapFantomeFuyard;
+                    break;
+                case OBSERVATEUR:
+                    pixmapFanome= pixmapFantomeOrange;
+                    break;
+                default:
+                    pixmapFanome= pixmapFantomeCyan;
+                    break;
+                }
+            }
+            painter.drawPixmap(itFantome->getPosX()*largeurCase, (itFantome->getPosY()+1)*hauteurCase, pixmapFanome);
+        }
         // Dessine Pacman en fonction de la direction:
         int rot;
         if (jeu.getDirPacman()==DROITE)
@@ -188,6 +176,7 @@ void PacmanWindow::finDeJeu(){
     etatJeu = 0;
 }
 
+
 void PacmanWindow::ajoutFantome() {
 
     jeu.AjoutFantome();
@@ -208,3 +197,62 @@ void PacmanButton::keyPressEvent(QKeyEvent *e)
 if (parent()!=nullptr)
 QCoreApplication::sendEvent(parent(), e);
 }
+
+void PacmanWindow::initImages()
+{
+    cout<<"Initialisation des images"<<endl;
+    if (pixmapPacman[0].load("./data/pacman1.bmp")==false)
+    {
+        cout<<"Impossible d'ouvrir pacman1.png"<<endl;
+        exit(-1);
+    }
+        if (pixmapPacman[1].load("./data/pacman2.bmp")==false)
+    {
+        cout<<"Impossible d'ouvrir pacman2.png"<<endl;
+        exit(-1);
+    }
+        if (pixmapPacman[2].load("./data/pacman2.bmp")==false)
+    {
+        cout<<"Impossible d'ouvrir pacman1.png"<<endl;
+        exit(-1);
+    }
+    imagePacman = 0;
+
+    //Images des fantomes
+
+    if (pixmapFantomeCyan.load("./data/fantomes/cyan.png")==false)
+    {
+        cout<<"Impossible d'ouvrir cyan.png"<<endl;
+        exit(-1);
+    }
+    if (pixmapFantomeRouge.load("./data/fantomes/rouge.png")==false)
+    {
+        cout<<"Impossible d'ouvrir rouge.png"<<endl;
+        exit(-1);
+    }
+    if (pixmapFantomeOrange.load("./data/fantomes/orange.png")==false)
+    {
+        cout<<"Impossible d'ouvrir orange.png"<<endl;
+        exit(-1);
+    }
+    if(pixmapFantomeFuyard.load("./data/fantomes/fuyard.png")==false)
+    {
+        cout<<"Impossible d'ouvrir fuyard.png"<<endl;
+        exit(-1);
+    }
+
+
+    if (pixmapMur.load("./data/greystone.png")==false)
+    {
+        cout<<"Impossible d'ouvrir mur.bmp"<<endl;
+        exit(-1);
+    }
+    if (pixmapVide.load("./data/background.bmp")==false)
+    {
+        cout<<"Impossible d'ouvrir mur.bmp"<<endl;
+        exit(-1);
+    }
+}
+
+
+

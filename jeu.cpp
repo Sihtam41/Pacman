@@ -9,7 +9,14 @@ Fantome::Fantome()
 {
     posX = 0; posY = 0;
     dir = BAS;
-    comportement = OBSERVATEUR;
+    int choix = rand()%10;
+    if (choix <= 0)//10% de chance d'être fuyard
+        comportement = TRAQUEUR;
+    else if (choix <= 4)//40% de chance d'être chasseur
+        comportement = OBSERVATEUR;
+    else//50% de chance d'être ALÉATOIRE
+        comportement = ALEATOIRE;
+
 }
 
 int Fantome::getPosX() const
@@ -150,14 +157,19 @@ bool Jeu::init()
 
 	terrain = new Case[largeur*hauteur];
 
+    generator.setWorldSize({largeur, hauteur});// met en place la taille du terrain pour l'algo Astar
+    
 	for(y=0;y<hauteur;++y)
 		for(x=0;x<largeur;++x)
             if (terrain_defaut[y][x]=='#')
+            {
                 terrain[y*largeur+x] = MUR;
+                generator.addCollision({x, y});//ajoute les murs au terrain pour l'algo Astar
+            }
             else
                 terrain[y*largeur+x] = VIDE;
 
-    fantomes.resize(1);//définit le nombre de fantomes au lacement du niveau
+    fantomes.resize(4);//définit le nombre de fantomes au lacement du niveau
 
 	for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
     {
@@ -185,7 +197,7 @@ bool Jeu::init()
 void Jeu::evolue()
 {
 
-    ////////////////////////////////Depalcement des fantomes///////////////////////////////
+    ////////////////////////////////Deplacement des fantomes///////////////////////////////
     int testX, testY;
 	list<Fantome>::iterator itFantome;
 
@@ -252,6 +264,27 @@ void Jeu::evolue()
 
                     
                     Dir_test.push_back(itFantome->dir);
+                }
+                else if (itFantome->comportement==TRAQUEUR)//Fonctionnel
+                {
+                    auto path = generator.findPath({itFantome->posX,itFantome->posY}, {posPacmanX, posPacmanY});
+                    if (path.size()>1)
+                    {
+                        int curseurProchainDeplacement= path.size()-2;
+                        if (path[curseurProchainDeplacement].x>itFantome->posX)
+                            itFantome->dir = DROITE;
+                        else if (path[curseurProchainDeplacement].x<itFantome->posX)
+                            itFantome->dir = GAUCHE;
+                        else if (path[curseurProchainDeplacement].y>itFantome->posY)
+                            itFantome->dir = BAS;
+                        else if (path[curseurProchainDeplacement].y<itFantome->posY)
+                            itFantome->dir = HAUT;
+                    }
+                    else
+                    {
+                        itFantome->dir = (Direction)(rand()%4);
+                        cout<<"bug : Le Traqueur ne trouve pas de chemin"<<endl;
+                    }
                 }
                 else if (itFantome->comportement==OBSERVATEUR)//Fonctionnel
                 {
