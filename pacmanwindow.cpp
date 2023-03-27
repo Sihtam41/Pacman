@@ -5,7 +5,6 @@ using namespace std;
 
 PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pParent, flags)
 {
-    cout<<"PaetzzeecmanWindow::PacmanWindow"<<endl;
     // Taille des cases en pixels
     int largeurCase, hauteurCase;
 
@@ -18,9 +17,13 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
 
     jeu.init();
 
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &PacmanWindow::handleTimer);
-    timer->start(150);
+    timerJeu = new QTimer(this);
+    connect(timerJeu, &QTimer::timeout, this, &PacmanWindow::handleTimerJeu);
+    timerJeu->start(20);
+
+    timerAffichage = new QTimer(this);
+    connect(timerAffichage, &QTimer::timeout, this, &PacmanWindow::handleTimerAffichage);
+    timerAffichage->start(40);
 
 
     largeurCase = pixmapMur.width();
@@ -117,12 +120,12 @@ void PacmanWindow::paintEvent(QPaintEvent *)
         painter.drawPixmap(jeu.getPacmanX()*largeurCase, (jeu.getPacmanY()+1)*hauteurCase, p);
         // prochaine image du pacman
         imagePacman++;
-        imagePacman%=3;
+        imagePacman%=4;
         }
 
     else if (etatJeu == 0)//affichage fin du jeu
     {
-        QPixmap p = pixmapPacman[2];
+        QPixmap p = pixmapPacman[1];
         for (int i=0;i<jeu.getNbCasesX();i++)
         {
             painter.drawPixmap(i*largeurCase, (jeu.getNbCasesY()/4)*hauteurCase, p);
@@ -160,13 +163,17 @@ void PacmanWindow::keyPressEvent(QKeyEvent *event)
     update();
 }
 
-void PacmanWindow::handleTimer()
+void PacmanWindow::handleTimerJeu()
 {
     jeu.evolue();
 
     if (jeu.getFin()==true)
         finDeJeu();
 
+}
+
+void PacmanWindow::handleTimerAffichage()
+{
     update();
 }
 
@@ -200,7 +207,6 @@ QCoreApplication::sendEvent(parent(), e);
 
 void PacmanWindow::initImages()
 {
-    cout<<"Initialisation des images"<<endl;
     if (pixmapPacman[0].load("./data/pacman1.bmp")==false)
     {
         cout<<"Impossible d'ouvrir pacman1.png"<<endl;
@@ -211,7 +217,12 @@ void PacmanWindow::initImages()
         cout<<"Impossible d'ouvrir pacman2.png"<<endl;
         exit(-1);
     }
-        if (pixmapPacman[2].load("./data/pacman2.bmp")==false)
+        if (pixmapPacman[2].load("./data/pacman3.bmp")==false)
+    {
+        cout<<"Impossible d'ouvrir pacman1.png"<<endl;
+        exit(-1);
+    }
+        if (pixmapPacman[3].load("./data/pacman2.bmp")==false)
     {
         cout<<"Impossible d'ouvrir pacman1.png"<<endl;
         exit(-1);

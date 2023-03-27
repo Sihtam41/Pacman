@@ -23,6 +23,7 @@ class Fantome
     Fantome();
     int getPosX() const;
     int getPosY() const;
+    int vitFantome=4;// la vitesse maximale est de 10
     EtatFantome getComportement() const {return comportement;}
 };
 
@@ -33,10 +34,12 @@ class Jeu
     AStar::Generator generator;
     int largeur, hauteur; // Nombre de cases en largeur et en hauteur
     int posPacmanX, posPacmanY;
+    int vitPacman=5;// la vitesse maximale est de 10
     Direction dirPacman;
     bool invincible=true;
     bool finJeu=false;
     std::list<Fantome> fantomes;
+    uint32_t Frame=0;//définit le nombre de Frame écoulé depuis le début du cycle (sert à définir la vitesse)
 
   public:
     Jeu();
