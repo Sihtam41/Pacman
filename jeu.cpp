@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <algorithm>
+#include <math.h>
 #include "jeu.hpp"
 
 using namespace std;
@@ -15,7 +16,7 @@ Fantome::Fantome()
     else if (choix <= 4)//40% de chance d'être chasseur
         comportement = OBSERVATEUR;
     else//50% de chance d'être ALÉATOIRE
-        comportement = ALEATOIRE;
+        comportement = FUYARD;
 
 }
 
@@ -88,7 +89,7 @@ bool Jeu::init()
 	int x, y;
 	list<Fantome>::iterator itFantome;
 
-	const char terrain_defaut[15][21] = {
+	/*const char terrain_defaut[15][21] = {
 		"####################",
 		"#........##........#",
 		"#.#####..##...####.#",
@@ -104,34 +105,24 @@ bool Jeu::init()
 		"#.....#......#.....#",
 		"#.....#......#.....#",
         "####################"
-    };
-    /*const char terrain_defaut[25][41] = {
-        "#########################.#............#",
-        "#...............#.......#.#.##########.#",
-        "#.#########.###.#.#####.#.#...........#.",
-        "#.#.......#.#...#.#.....#.#.#########.#.",
-        "#.#.#####.#.#.#.#.#####.#.#.#.......#.#.",
-        "#.#.#.....#.#.#.#...#...#.#.#.#.#.#.#.#.",
-        "#.#.#.#####.#.#.#.###.#.#.#.#.#.#.#.#.#.",
-        "#.#.#.#.....#.#.#.#.#.#.#.#.#.#.#.#.#.#.",
-        "#.#.#.#.#####.#.#.#.#.#.#.#.#.#.#.#.#.#.",
-        "#.#.#.#.......#.#.#.#.#.#.#.#.#.#.#.#.#.",
-        "#.#.#.#########.#.#.#.#.#.#.#.#.#.#.#.#.",
-        "#.#.#...........#.#.#.#.#.#.#.#.#.#.#.#.",
-        "#.#.#############.#.#.#.#.#.#.#.#.#.#.#.",
-        "#.#...............#.#.#.#.#.#.#.#.#.#.#.",
-        "#.#################.#.#.#.#.#.#.#.#.#.#.",
-        "#...................#.#.#.#.#.#.#.#.#.#.",
-        "#####################.#.#.#.#.#.#.#.#.#.",
-        "#.....................#.#.#.#.#.#.#.#.#.",
-        "#.#####################.#.#.#.#.#.#.#.#.",
-        "#.#...................#.#.#.#.#.#.#.#.#.",
-        "#.#.#################.#.#.#.#.#.#.#.#.#.",
-        "#.#.................#.#.#.#.#.#.#.#.#.#.",
-        "#.#################.#.#.#.#.#.#.#.#.#.#.",
-        "#.................#.#.#.#.#.#.#.#.#.#.#.",
-        "##################.#.#.#.#.#.#.#.#.#.#.."
     };*/
+    const char terrain_defaut[15][22] = {
+            "#####################",
+            "#.........#.........#",
+            "#.###.###.#.###.###.#",
+            "#...................#",
+            "#.##.##.#####.##.##.#",
+            "#.##.##.#####.##.##.#",
+            "#.......#####.......#",
+            "#######.......#######",
+            "#.......#####.......#",
+            "#.##.##.#...#.##.##.#",
+            "#.##.##.#.#.#.##.##.#",
+            "#...................#",
+            "#.#####.#####.#######",
+            "#...................#",
+            "#####################"
+        };
        /* const char terrain_defaut[15][22] = {
         "#####################",
         "#.............#.....#",
@@ -152,7 +143,7 @@ bool Jeu::init()
     };*/
 
 
-	largeur = 20;
+	largeur = 21;
 	hauteur = 15;
 
 	terrain = new Case[largeur*hauteur];
@@ -223,26 +214,80 @@ void Jeu::evolue()
                             itFantome->dir = (Direction)(rand()%4);
                     }
 
-                    else if (itFantome->comportement==FUYARD)// ne fonctionne pas bien
+                    else if (itFantome->comportement==FUYARD)//Fonctionne mais pas forcément super
+                    //Indiquer la direction que le fantome ne peut pas prendre et non choisir la direction dans laquelle il doit aller
                     {
-                        auto it_DROITE = find(Dir_test.begin(), Dir_test.end(), DROITE);
-                        auto it_GAUCHE = find(Dir_test.begin(), Dir_test.end(), GAUCHE);
-                        auto it_HAUT = find(Dir_test.begin(), Dir_test.end(), HAUT);
-                        auto it_BAS = find(Dir_test.begin(), Dir_test.end(), BAS);
-                        // Déplacement loin du pacman
-                        if (itFantome->posX<posPacmanX && it_GAUCHE==Dir_test.end())
-                            itFantome->dir = GAUCHE;
-                        else if (itFantome->posX>posPacmanX && it_DROITE==Dir_test.end())
-                            itFantome->dir = DROITE;
-                        else if (itFantome->posY<posPacmanY && it_HAUT==Dir_test.end())
-                            itFantome->dir = HAUT;
-                        else if (itFantome->posY>posPacmanY && it_BAS==Dir_test.end())
-                            itFantome->dir = BAS;
+                        int x=itFantome->posX;
+                        int y=itFantome->posY;
+                        int Px=posPacmanX;
+                        int Py=posPacmanY;
+
+                        int fX,fY;//Poisition futur
+                        float  dMax=-1;
+                        int xMax,yMax;
+
+                        //on test la postiion au dessus du fantomes
+                        fX=x+1;
+                        fY=y;
+                        if(Distance(x,y,Px,Py)<= 5)
+                        {
+                            if (posValide(fX,fY))
+                            {
+                                float d=Distance(fX,fY,Px,Py);
+                                if(d>=dMax)
+                                    {
+                                        dMax=d;
+                                        itFantome->dir=DROITE;
+                                    }
+                            }
+                            fX=x-1;
+                            fY=y;
+                            if (posValide(fX,fY))
+                            {
+                                float d=Distance(fX,fY,Px,Py);
+                                if(d>=dMax)
+                                    {
+                                        dMax=d;
+                                        itFantome->dir=GAUCHE;
+                                    }
+                            }
+                            fX=x;
+                            fY=y+1;
+                            if (posValide(fX,fY))
+                            {
+                                float d=Distance(fX,fY,Px,Py);
+                                if(d>=dMax)
+                                    {
+                                        dMax=d;
+                                        itFantome->dir=BAS;
+                                    }
+                            }
+                            fX=x;
+                            fY=y-1;
+                            if (posValide(fX,fY))
+                            {
+                                float d=Distance(fX,fY,Px,Py);
+                                if(d>=dMax)
+                                    {
+                                        dMax=d;
+                                        itFantome->dir=HAUT;
+                                    }
+                            }
+                        }
                         else
+                        {
+                            int testX2 = itFantome->posX + depX[itFantome->dir];
+                            int testY2 = itFantome->posY + depY[itFantome->dir];
+                            if (terrain[testY2*largeur+testX2]!=VIDE)//si le fantome ne va pas sur un mur
                             itFantome->dir = (Direction)(rand()%4);
+                           }
 
                         
-                        Dir_test.push_back(itFantome->dir);
+
+                        
+
+                        
+                            
                     }
                     else if (itFantome->comportement==CHASSEUR)// Ne fonctione pas super bien
                     {
@@ -268,11 +313,11 @@ void Jeu::evolue()
                     }
                     else if (itFantome->comportement==TRAQUEUR)//Fonctionnel
                     {
-                        auto path = generator.findPath({itFantome->posX,itFantome->posY}, {posPacmanX, posPacmanY});
-                        if (path.size()>1)
+                        auto path = generator.findPath({itFantome->posX,itFantome->posY}, {posPacmanX, posPacmanY});// créer le chemin
+                        if (path.size()>1)// qaund il a trouvé un chemin supérieur à 1
                         {
-                            int curseurProchainDeplacement= path.size()-2;
-                            if (path[curseurProchainDeplacement].x>itFantome->posX)
+                            int curseurProchainDeplacement= path.size()-2;// cherche l'avant dernier case qui correspond au prochain déplacement 
+                            if (path[curseurProchainDeplacement].x>itFantome->posX)// si il doit aller à droite
                                 itFantome->dir = DROITE;
                             else if (path[curseurProchainDeplacement].x<itFantome->posX)
                                 itFantome->dir = GAUCHE;
@@ -281,11 +326,10 @@ void Jeu::evolue()
                             else if (path[curseurProchainDeplacement].y<itFantome->posY)
                                 itFantome->dir = HAUT;
                         }
-                        else
-                        {
+                        else// Si il ne trouve pas de chemin
                             itFantome->dir = (Direction)(rand()%4);
-                            cout<<"bug : Le Traqueur ne trouve pas de chemin"<<endl;
-                        }
+
+
                     }
                     else if (itFantome->comportement==OBSERVATEUR)//Fonctionnel
                     {
@@ -375,7 +419,7 @@ void Jeu::evolue()
                 testX = itFantome->posX + depX[itFantome->dir];
                 testY = itFantome->posY + depY[itFantome->dir];
 
-                if (terrain[testY*largeur+testX]==VIDE)//si le fantome ne va pas sur un mur
+                if (posValide(testX,testY))//si le fantome ne va pas sur un mur
                 {//alors il se deplace
                     itFantome->posX = testX;
                     itFantome->posY = testY;
@@ -413,7 +457,10 @@ bool Jeu::colisionPacmanFantome()
 
     return false;
 }
-
+float Jeu::Distance(int a, int b, int c, int d)
+{
+    return sqrt((a-c)*(a-c) + (b-d)*(b-d));
+}
 int Jeu::getNbCasesX() const
 {
     return largeur;

@@ -11,10 +11,13 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     this->setStyleSheet("background-color: rgb(80, 80, 80);");
 
     initImages();
+    /////////////////// Charger une police depuis le fichier/////////////////////
+    // Charger la police depuis le fichier
+    QString fontFile = QApplication::applicationDirPath() + "/PAC-FONT.TTF";
+    int fontId = QFontDatabase::addApplicationFont(fontFile);
+    // Récupérer le nom de la police
+    PacmanFont = QFontDatabase::applicationFontFamilies(fontId).at(0);
     
-
-    etatJeu = 1;
-
     jeu.init();
 
     timerJeu = new QTimer(this);
@@ -39,20 +42,27 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     btn2->setGeometry(170,2.5,150,hauteurCase-5);
     btn2->setStyleSheet("background-color: white");
 
-    PacmanButton *btn3 = new PacmanButton("Fin",this);
-    btn3->setGeometry(475,2.5,150,hauteurCase-5);
+    PacmanButton *btn3 = new PacmanButton("Pause",this);
+    btn3->setGeometry(330,2.5,150,hauteurCase-5);
     btn3->setStyleSheet("background-color: white");
+
+    PacmanButton *btn4 = new PacmanButton("Fin",this);
+    btn4->setGeometry(500,2.5,150,hauteurCase-5);
+    btn4->setStyleSheet("background-color: white");
 
     connect(btn1, &QPushButton::clicked, this, &PacmanWindow::ajoutFantome);
 
     connect(btn2, &QPushButton::clicked, this, &PacmanWindow::retraitFantome);
 
-    connect(btn3, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
+    connect(btn3, &QPushButton::clicked, this, &PacmanWindow::Pause);
+
+    connect(btn4, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
 
 
     resize(jeu.getNbCasesX()*largeurCase, jeu.getNbCasesY()*(hauteurCase+2));
 }
-
+///////////////////////////////////////////AFFICHAGE///////////////////////////////////////////
+ 
 void PacmanWindow::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
@@ -65,7 +75,7 @@ void PacmanWindow::paintEvent(QPaintEvent *)
         largeurCase = pixmapMur.width();
         hauteurCase = pixmapMur.height();
 
-    if (etatJeu==1)
+    if (etatJeu==PLAY)
     {
 
 
@@ -121,9 +131,8 @@ void PacmanWindow::paintEvent(QPaintEvent *)
         // prochaine image du pacman
         imagePacman++;
         imagePacman%=4;
-        }
-
-    else if (etatJeu == 0)//affichage fin du jeu
+    }
+    else if (etatJeu == FIN)//affichage fin du jeu
     {
         QPixmap p = pixmapPacman[1];
         for (int i=0;i<jeu.getNbCasesX();i++)
@@ -131,16 +140,30 @@ void PacmanWindow::paintEvent(QPaintEvent *)
             painter.drawPixmap(i*largeurCase, (jeu.getNbCasesY()/4)*hauteurCase, p);
             painter.drawPixmap(i*largeurCase, (jeu.getNbCasesY()/4)*hauteurCase*4, p);
         }
-        /*PacmanButton *button = findChild<PacmanButton*>("Fin");
-        button->deleteLater();*/
-
-        //painter.fillRect(rect(), Qt::white);
-
         painter.setPen(Qt::black);
-        painter.setFont(QFont("Arial", 50));
-        painter.drawText(rect(), Qt::AlignCenter, "Fin du jeu");
+        painter.setFont(QFont(PacmanFont, 50));
+        painter.drawText(rect(), Qt::AlignCenter, "fin du jeu");
 
         QTimer::singleShot(3000, this, &PacmanWindow::close);
+
+    }
+    else if(etatJeu==PAUSE)
+    {   
+
+        // Calculer les coordonnées du centre de l'écran
+        int centerX = jeu.getNbCasesX()/2*largeurCase;
+        int centerY = jeu.getNbCasesY()/2*hauteurCase;
+
+        // Définir les dimensions du rectangle
+        int lrect = 500;
+        int hrect = 100;
+
+        // Créer un QRect centré sur la fenêtre
+        QRect rectangle(centerX - lrect / 2, centerY - hrect / 2, lrect, hrect);
+
+        painter.setFont(QFont(PacmanFont, 50));//définit la police et la taille du texte
+        painter.fillRect(rectangle, Qt::white);
+        painter.drawText(rectangle, Qt::AlignCenter, tr("pause"));
 
     }
 
@@ -180,7 +203,21 @@ void PacmanWindow::handleTimerAffichage()
 void PacmanWindow::finDeJeu(){
 
 
-    etatJeu = 0;
+    etatJeu = FIN;
+}
+
+void PacmanWindow::Pause(){
+
+    if (timerJeu->isActive())
+        {
+            timerJeu->stop();
+            etatJeu=PAUSE;
+        }
+    else
+        {
+            timerJeu->start(20);
+            etatJeu=PLAY;
+        }
 }
 
 

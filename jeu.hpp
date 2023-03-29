@@ -68,7 +68,8 @@ class Jeu
 
     // Retourne la liste de fantomes en lecture seule
     const std::list<Fantome> &getFantomes() const;
-
+    //Distance entre deux points
+    float Distance(int, int, int, int);
     // Indique si la case � une position donn�e existe et est vide
     // (Pacman ou les fantomes peuvent l'occuper)
     bool posValide(int, int) const;
