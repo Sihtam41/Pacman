@@ -14,6 +14,7 @@ class PacmanWindow : public QFrame
     QPixmap  pixmapMur, pixmapVide;
     QPixmap pixmapPacman [4];
     QPixmap pixmapFantomeRouge, pixmapFantomeCyan, pixmapFantomeOrange, pixmapFantomeFuyard;
+    QPixmap pixmapJeu;
     int imagePacman;
     EtatJeu etatJeu=PLAY;//1 si le jeu est en fonction et 0 si la fin du jeu
 
@@ -31,6 +32,7 @@ class PacmanWindow : public QFrame
     void Pause();//Met sur pause ou sur play le jeu
     void onGameOver();
     void initImages();
+    void screenShot();
   protected:
     void paintEvent(QPaintEvent *);
     void keyPressEvent(QKeyEvent *);

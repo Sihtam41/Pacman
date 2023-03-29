@@ -65,7 +65,15 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
  
 void PacmanWindow::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
+    //QPainter painter(this);
+    QImage image(size(), QImage::Format_ARGB32_Premultiplied);
+    //image.fill(Qt::white);
+
+    // Dessiner quelque chose sur l'image
+    QPainter painter(&image);
+    
+
+   
 
     int x, y;
 
@@ -149,7 +157,7 @@ void PacmanWindow::paintEvent(QPaintEvent *)
     }
     else if(etatJeu==PAUSE)
     {   
-
+        painter.drawPixmap(0, 0, pixmapJeu);
         // Calculer les coordonnées du centre de l'écran
         int centerX = jeu.getNbCasesX()/2*largeurCase;
         int centerY = jeu.getNbCasesY()/2*hauteurCase;
@@ -167,7 +175,21 @@ void PacmanWindow::paintEvent(QPaintEvent *)
 
     }
 
+    // Créer un QPixmap et dessiner l'image sur le pixmap
+    QPixmap pixmap(size());
+    pixmap.fill(Qt::transparent);
+    QPainter pixmapPainter(&pixmap);
+    pixmapPainter.drawImage(0, 0, image);
 
+    // Enregistrer le pixmap dans un fichier
+    //pixmap.save("image.png");
+
+    // Afficher l'image dans le widget
+    QPainter widgetPainter(this);
+    widgetPainter.drawPixmap(0, 0, pixmap);
+
+    if (etatJeu==PLAY)//Si le jeu est sur play alors on enregistre l'image de jeu
+        pixmapJeu = pixmap;
 
 
 }
@@ -183,7 +205,10 @@ void PacmanWindow::keyPressEvent(QKeyEvent *event)
         jeu.setDirPacman(HAUT);
     else if (event->key()==Qt::Key_Down)
         jeu.setDirPacman(BAS);
-    update();
+    else if (event->key()==Qt::Key_Escape || event->key()==Qt::Key_P )
+        Pause();
+    else if (event->key()==Qt::Key_F2)
+        screenShot();
 }
 
 void PacmanWindow::handleTimerJeu()
@@ -220,7 +245,31 @@ void PacmanWindow::Pause(){
         }
 }
 
+void PacmanWindow::screenShot() {//prend un screen du jeu et pas de la fenettre courante
+    cout<<"screenshot"<<endl;
+    
 
+    QString path = QCoreApplication::applicationDirPath() +"/screen";
+
+    // Vérifier si le dossier existe déjà
+    QDir dir(path);
+    if (!dir.exists()) {
+        // Créer le dossier
+        cout<<"creation du dossier"<<endl;
+        dir.mkpath(".");
+    }
+    else//si le dossier est présent alors on enregistre l'image
+    {
+
+        // Obtenir la date et l'heure actuelles en chaîne de caractères
+        QString currentDateTimeString = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss");
+
+        // Créer le lien pour enregistrer l'image avec la date et l'heure dans le nom de fichier
+        QString pathImage = "screen/image-" + currentDateTimeString + ".png";
+
+        pixmapJeu.save(pathImage);//Sauvegarde de l'image de jeu
+    }
+}
 void PacmanWindow::ajoutFantome() {
 
     jeu.AjoutFantome();
