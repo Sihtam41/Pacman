@@ -16,7 +16,7 @@ Fantome::Fantome()
     else if (choix <= 4)//40% de chance d'être chasseur
         comportement = OBSERVATEUR;
     else//50% de chance d'être ALÉATOIRE
-        comportement = FUYARD;
+        comportement = ALEATOIRE;
 
 }
 
@@ -108,7 +108,7 @@ bool Jeu::init()
     };*/
     const char terrain_defaut[15][22] = {
             "#####################",
-            "#.........#.........#",
+            "..........#.........#",
             "#.###.###.#.###.###.#",
             "#...................#",
             "#.##.##.#####.##.##.#",
@@ -120,9 +120,17 @@ bool Jeu::init()
             "#.##.##.#.#.#.##.##.#",
             "#...................#",
             "#.#####.#####.#######",
-            "#...................#",
+            "#....................",
             "#####################"
         };
+        //on définit l'entrée et la sortie des deux portails
+        
+
+        portail.resize(2);//définit le nombre de fantomes au lacement du niveau
+        portail.push_back({-1,1,20,13});
+        portail.push_back({21,13,0,1});        
+        
+        //Portail[1] = {20,1};
        /* const char terrain_defaut[15][22] = {
         "#####################",
         "#.............#.....#",
@@ -160,20 +168,6 @@ bool Jeu::init()
             else
                 terrain[y*largeur+x] = VIDE;
 
-    fantomes.resize(4);//définit le nombre de fantomes au lacement du niveau
-
-	for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
-    {
-        do {
-            x = rand()%largeur;
-            y = rand()%hauteur;
-        } while (terrain[y*largeur+x]!=VIDE);
-
-        itFantome->posX = x;
-        itFantome->posY = y;
-        itFantome->dir = (Direction)(rand()%4);
-    }
-
     do {
         x = rand()%largeur;
         y = rand()%hauteur;
@@ -181,6 +175,22 @@ bool Jeu::init()
 
     posPacmanX = x,
     posPacmanY = y;
+
+
+    fantomes.resize(4);//définit le nombre de fantomes au lacement du niveau
+
+	for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
+    {
+        do {
+            x = rand()%largeur;
+            y = rand()%hauteur;
+        } while (terrain[y*largeur+x]!=VIDE);// on vérifie que le fantome n'apparaisse pas dans un mur
+
+        itFantome->posX = x;
+        itFantome->posY = y;
+        itFantome->dir = (Direction)(rand()%4);
+    }
+
 
     return true;
 }
@@ -514,14 +524,21 @@ bool Jeu::deplacePacman(Direction dir)
 {
     if (Frame%(10-vitPacman)==0)
     {
+        //cout<<"pos pacman ="<<posPacmanX<<","<<posPacmanY<<endl;
         int depX[] = {-1, 1, 0, 0};
         int depY[] = {0, 0, -1, 1};
         int testX, testY;
 
         testX = posPacmanX + depX[dir];
         testY = posPacmanY + depY[dir];
-
-        if (posValide(testX, testY))
+        if (posPortail(testX,testY))//test si le pacman est sur un portail
+        {
+            Coord c=Teleportation(testX,testY);
+            posPacmanX = c.x;
+            posPacmanY = c.y;
+            return true;
+        }
+        else if (posValide(testX, testY))
         {
             posPacmanX = testX;
             posPacmanY = testY;
@@ -530,10 +547,38 @@ bool Jeu::deplacePacman(Direction dir)
         else
             return false;
     }
-    else
+    else//Si le pacman ne peut pas se deplacer
         return false;
+        
 }
 
+Coord Jeu::Teleportation(int x, int y)
+{
+    Coord c={-1,-1};
+    list<Portail>::iterator itPortail;
+	for (itPortail=portail.begin(); itPortail!=portail.end(); itPortail++)
+    {
+        if ((itPortail->Entree.x == x) && (itPortail->Entree.y == y))
+        {
+            c=itPortail->Sortie;
+        }
+    }
+
+    return c;
+}
+bool Jeu::posPortail(int x, int y) 
+{
+    list<Portail>::iterator itPortail;
+	for (itPortail=portail.begin(); itPortail!=portail.end(); itPortail++)
+    {
+        if ((itPortail->Entree.x == x) && (itPortail->Entree.y == y))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 void Jeu::RetraitFantome()
 {
     list<Fantome>::iterator itFantome;

@@ -32,31 +32,31 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     largeurCase = pixmapMur.width();
     hauteurCase = pixmapMur.height();
 
-        // gestion boutton
+    // Déclaration des boutons :
 
-    PacmanButton *btn1 = new PacmanButton("Ajout de fantome",this);
-    btn1->setGeometry(10,2.5,150,hauteurCase-5);
-    btn1->setStyleSheet("background-color: white");
+    btnAjoutFantome = new PacmanButton("Ajout de fantome",this);
+    btnAjoutFantome->setGeometry(10,2.5,150,hauteurCase-5);
+    btnAjoutFantome->setStyleSheet("background-color: white");
 
-    PacmanButton *btn2 = new PacmanButton("Retrait de fantome",this);
-    btn2->setGeometry(170,2.5,150,hauteurCase-5);
-    btn2->setStyleSheet("background-color: white");
+    btnRetraitFantome = new PacmanButton("Retrait de fantome",this);
+    btnRetraitFantome->setGeometry(170,2.5,150,hauteurCase-5);
+    btnRetraitFantome->setStyleSheet("background-color: white");
 
-    PacmanButton *btn3 = new PacmanButton("Pause",this);
-    btn3->setGeometry(330,2.5,150,hauteurCase-5);
-    btn3->setStyleSheet("background-color: white");
+    btnPause = new PacmanButton("Pause",this);
+    btnPause->setGeometry(330,2.5,150,hauteurCase-5);
+    btnPause->setStyleSheet("background-color: white");
 
-    PacmanButton *btn4 = new PacmanButton("Fin",this);
-    btn4->setGeometry(500,2.5,150,hauteurCase-5);
-    btn4->setStyleSheet("background-color: white");
+    btnFin = new PacmanButton("Fin",this);
+    btnFin->setGeometry(500,2.5,150,hauteurCase-5);
+    btnFin->setStyleSheet("background-color: white");
 
-    connect(btn1, &QPushButton::clicked, this, &PacmanWindow::ajoutFantome);
+    connect(btnAjoutFantome, &QPushButton::clicked, this, &PacmanWindow::ajoutFantome);
 
-    connect(btn2, &QPushButton::clicked, this, &PacmanWindow::retraitFantome);
+    connect(btnRetraitFantome, &QPushButton::clicked, this, &PacmanWindow::retraitFantome);
 
-    connect(btn3, &QPushButton::clicked, this, &PacmanWindow::Pause);
+    connect(btnPause, &QPushButton::clicked, this, &PacmanWindow::Pause);
 
-    connect(btn4, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
+    connect(btnFin, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
 
 
     resize(jeu.getNbCasesX()*largeurCase, jeu.getNbCasesY()*(hauteurCase+2));
@@ -142,15 +142,22 @@ void PacmanWindow::paintEvent(QPaintEvent *)
     }
     else if (etatJeu == FIN)//affichage fin du jeu
     {
-        QPixmap p = pixmapPacman[1];
+        /*QPixmap p = pixmapPacman[1];
         for (int i=0;i<jeu.getNbCasesX();i++)
         {
             painter.drawPixmap(i*largeurCase, (jeu.getNbCasesY()/4)*hauteurCase, p);
             painter.drawPixmap(i*largeurCase, (jeu.getNbCasesY()/4)*hauteurCase*4, p);
-        }
-        painter.setPen(Qt::black);
-        painter.setFont(QFont(PacmanFont, 50));
-        painter.drawText(rect(), Qt::AlignCenter, "fin du jeu");
+        }*/
+
+        //On cache les boutons
+        btnAjoutFantome->hide();
+        btnRetraitFantome->hide();
+        btnPause->hide();
+        btnFin->hide();
+        // on change le fond et on écrit le texte final
+        this->setStyleSheet("background-color: rgb(153, 115, 0);");//change la couleur du fond
+        painter.setFont(QFont(PacmanFont, 60));
+        painter.drawText(rect(), Qt::AlignCenter, tr("100000000000000009\n\nFIN DU JEU\n\n100000000000000009"));// 1,0,9 correspondent a des images
 
         QTimer::singleShot(3000, this, &PacmanWindow::close);
 
@@ -159,8 +166,8 @@ void PacmanWindow::paintEvent(QPaintEvent *)
     {   
         painter.drawPixmap(0, 0, pixmapJeu);
         // Calculer les coordonnées du centre de l'écran
-        int centerX = jeu.getNbCasesX()/2*largeurCase;
-        int centerY = jeu.getNbCasesY()/2*hauteurCase;
+        int centerX = jeu.getNbCasesX()*largeurCase/2;
+        int centerY = jeu.getNbCasesY()*(hauteurCase+1)/2;
 
         // Définir les dimensions du rectangle
         int lrect = 500;
@@ -170,8 +177,8 @@ void PacmanWindow::paintEvent(QPaintEvent *)
         QRect rectangle(centerX - lrect / 2, centerY - hrect / 2, lrect, hrect);
 
         painter.setFont(QFont(PacmanFont, 50));//définit la police et la taille du texte
-        painter.fillRect(rectangle, Qt::white);
-        painter.drawText(rectangle, Qt::AlignCenter, tr("pause"));
+        painter.fillRect(rectangle, Qt::gray);
+        painter.drawText(rectangle, Qt::AlignCenter, tr("PAUSE"));
 
     }
 
@@ -258,17 +265,17 @@ void PacmanWindow::screenShot() {//prend un screen du jeu et pas de la fenettre 
         cout<<"creation du dossier"<<endl;
         dir.mkpath(".");
     }
-    else//si le dossier est présent alors on enregistre l'image
-    {
+    //Le dossier est présent alors on enregistre l'image
 
-        // Obtenir la date et l'heure actuelles en chaîne de caractères
-        QString currentDateTimeString = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss");
 
-        // Créer le lien pour enregistrer l'image avec la date et l'heure dans le nom de fichier
-        QString pathImage = "screen/image-" + currentDateTimeString + ".png";
+    // Obtenir la date et l'heure actuelles en chaîne de caractères
+    QString currentDateTimeString = QDateTime::currentDateTime().toString("yyyy-MM-dd-hh-mm-ss");
 
-        pixmapJeu.save(pathImage);//Sauvegarde de l'image de jeu
-    }
+    // Créer le lien pour enregistrer l'image avec la date et l'heure dans le nom de fichier
+    QString pathImage = "screen/image-" + currentDateTimeString + ".png";
+
+    pixmapJeu.save(pathImage);//Sauvegarde de l'image de jeu
+
 }
 void PacmanWindow::ajoutFantome() {
 
@@ -287,8 +294,8 @@ PacmanButton::PacmanButton(const QString &text, QWidget *parent) : QPushButton(t
 
 void PacmanButton::keyPressEvent(QKeyEvent *e)
 {
-if (parent()!=nullptr)
-QCoreApplication::sendEvent(parent(), e);
+    if (parent()!=nullptr)
+        QCoreApplication::sendEvent(parent(), e);
 }
 
 void PacmanWindow::initImages()

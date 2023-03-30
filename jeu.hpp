@@ -10,6 +10,16 @@ typedef enum {FUYARD, CHASSEUR, ALEATOIRE, OBSERVATEUR, TRAQUEUR} EtatFantome;
 
 class Jeu;
 
+typedef struct Coord {
+    int x;
+    int y;
+}Coord;
+
+typedef struct Portail {
+    Coord Entree;
+    Coord Sortie;
+}Portail;
+
 class Fantome
 {
     friend class Jeu;
@@ -40,6 +50,8 @@ class Jeu
     bool finJeu=false;
     std::list<Fantome> fantomes;
     uint32_t Frame=0;//définit le nombre de Frame écoulé depuis le début du cycle (sert à définir la vitesse)
+
+    std::list<Portail> portail;//liste des portails
 
   public:
     Jeu();
@@ -73,6 +85,9 @@ class Jeu
     // Indique si la case � une position donn�e existe et est vide
     // (Pacman ou les fantomes peuvent l'occuper)
     bool posValide(int, int) const;
+    // Seul pacman peut passer par les portails
+    bool posPortail(int, int);
+    Coord Teleportation(int, int);// renvois l'index du portail si la position est un portail, sinon renvois -1
 
     // D�place Pacman dans une direction (si la case � atteindre est valide)
     bool deplacePacman(Direction);

@@ -7,6 +7,8 @@
 
 typedef enum {FIN, PAUSE, PLAY} EtatJeu;
 
+class PacmanButton;
+
 class PacmanWindow : public QFrame
 {
   protected:
@@ -16,7 +18,9 @@ class PacmanWindow : public QFrame
     QPixmap pixmapFantomeRouge, pixmapFantomeCyan, pixmapFantomeOrange, pixmapFantomeFuyard;
     QPixmap pixmapJeu;
     int imagePacman;
-    EtatJeu etatJeu=PLAY;//1 si le jeu est en fonction et 0 si la fin du jeu
+    EtatJeu etatJeu=PLAY;
+
+    PacmanButton *btnPause, *btnFin, *btnAjoutFantome, *btnRetraitFantome;
 
     QTimer *timerAffichage, *timerJeu;
 
@@ -39,11 +43,13 @@ class PacmanWindow : public QFrame
 
 };
 
+
 class PacmanButton : public QPushButton
 {
     public:
         PacmanButton(const QString &text, QWidget *parent = nullptr);
         void keyPressEvent(QKeyEvent *);
 };
+
 
 #endif
