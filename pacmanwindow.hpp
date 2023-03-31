@@ -5,7 +5,7 @@
 #include <QtWidgets/QtWidgets>
 #include "jeu.hpp"
 
-typedef enum {FIN, PAUSE, PLAY} EtatJeu;
+typedef enum {FIN, PAUSE, PLAY, MENU} EtatJeu;
 
 class PacmanButton;
 
@@ -17,10 +17,12 @@ class PacmanWindow : public QFrame
     QPixmap pixmapPacman [4];
     QPixmap pixmapFantomeRouge, pixmapFantomeCyan, pixmapFantomeOrange, pixmapFantomeFuyard;
     QPixmap pixmapJeu;
+    QPixmap pixmapMenu;
     int imagePacman;
-    EtatJeu etatJeu=PLAY;
+    EtatJeu etatJeu=MENU;
 
     PacmanButton *btnPause, *btnFin, *btnAjoutFantome, *btnRetraitFantome;
+    PacmanButton *btnLancerJeu, *btnQuitter;
 
     QTimer *timerAffichage, *timerJeu;
 
@@ -34,7 +36,8 @@ class PacmanWindow : public QFrame
     void retraitFantome();
     void finDeJeu();
     void Pause();//Met sur pause ou sur play le jeu
-    void onGameOver();
+    bool init();
+    bool lancerJeu();
     void initImages();
     void screenShot();
   protected:

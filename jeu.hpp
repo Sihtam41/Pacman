@@ -46,7 +46,7 @@ class Jeu
     int posPacmanX, posPacmanY;
     int vitPacman=5;// la vitesse maximale est de 10
     Direction dirPacman;
-    bool invincible=true;
+    bool invincible=false;
     bool finJeu=false;
     std::list<Fantome> fantomes;
     uint32_t Frame=0;//définit le nombre de Frame écoulé depuis le début du cycle (sert à définir la vitesse)
@@ -99,6 +99,8 @@ class Jeu
     void AjoutFantome();
     //Rrtourne vrai si il y a une colision entre un fantome et pacman, sinon retourne faux 
     bool colisionPacmanFantome();
+
+
 };
 
 #endif

@@ -5,20 +5,61 @@ using namespace std;
 
 PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pParent, flags)
 {
-    // Taille des cases en pixels
-    int largeurCase, hauteurCase;
 
-    this->setStyleSheet("background-color: rgb(80, 80, 80);");
-
-    initImages();
     /////////////////// Charger une police depuis le fichier/////////////////////
     // Charger la police depuis le fichier
     QString fontFile = QApplication::applicationDirPath() + "/PAC-FONT.TTF";
     int fontId = QFontDatabase::addApplicationFont(fontFile);
     // Récupérer le nom de la police
     PacmanFont = QFontDatabase::applicationFontFamilies(fontId).at(0);
+
+
+    this->move(100, 100);
+    initImages();
+    resize(976,800);
+
+    // Déclaration des boutons :
+
+    btnLancerJeu = new PacmanButton("", this);
+    btnLancerJeu->setGeometry(318,401,330,110);
+    connect(btnLancerJeu, &QPushButton::clicked, this, &PacmanWindow::lancerJeu);
+    btnLancerJeu->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+
+    btnQuitter = new PacmanButton("", this);
+    btnQuitter->setGeometry(318,601,330,110);
+    connect(btnQuitter, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
+    btnQuitter->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+
+    btnAjoutFantome = new PacmanButton("Ajout de fantome",this);
+    btnAjoutFantome->setGeometry(10,2.5,150,32-5);
+    btnAjoutFantome->setStyleSheet("background-color: white");
+    btnAjoutFantome->hide();
+
+    btnRetraitFantome = new PacmanButton("Retrait de fantome",this);
+    btnRetraitFantome->setGeometry(170,2.5,150,32-5);
+    btnRetraitFantome->setStyleSheet("background-color: white");
+    btnRetraitFantome->hide();
+
+    btnPause = new PacmanButton("Pause",this);
+    btnPause->setGeometry(330,2.5,150,32-5);
+    btnPause->setStyleSheet("background-color: white");
+    btnPause->hide();
+
+    btnFin = new PacmanButton("Fin",this);
+    btnFin->setGeometry(500,2.5,150,32-5);
+    btnFin->setStyleSheet("background-color: white");
+    btnFin->hide();
+}
+bool PacmanWindow::init()
+{
+    // Taille des cases en pixels
+    int largeurCase, hauteurCase;
     
+    this->setStyleSheet("background-color: rgb(80, 80, 80);");
     jeu.init();
+    etatJeu=PLAY;
+
+    
 
     timerJeu = new QTimer(this);
     connect(timerJeu, &QTimer::timeout, this, &PacmanWindow::handleTimerJeu);
@@ -32,23 +73,7 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     largeurCase = pixmapMur.width();
     hauteurCase = pixmapMur.height();
 
-    // Déclaration des boutons :
 
-    btnAjoutFantome = new PacmanButton("Ajout de fantome",this);
-    btnAjoutFantome->setGeometry(10,2.5,150,hauteurCase-5);
-    btnAjoutFantome->setStyleSheet("background-color: white");
-
-    btnRetraitFantome = new PacmanButton("Retrait de fantome",this);
-    btnRetraitFantome->setGeometry(170,2.5,150,hauteurCase-5);
-    btnRetraitFantome->setStyleSheet("background-color: white");
-
-    btnPause = new PacmanButton("Pause",this);
-    btnPause->setGeometry(330,2.5,150,hauteurCase-5);
-    btnPause->setStyleSheet("background-color: white");
-
-    btnFin = new PacmanButton("Fin",this);
-    btnFin->setGeometry(500,2.5,150,hauteurCase-5);
-    btnFin->setStyleSheet("background-color: white");
 
     connect(btnAjoutFantome, &QPushButton::clicked, this, &PacmanWindow::ajoutFantome);
 
@@ -58,8 +83,9 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
 
     connect(btnFin, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
 
-
     resize(jeu.getNbCasesX()*largeurCase, jeu.getNbCasesY()*(hauteurCase+2));
+
+    return true;
 }
 ///////////////////////////////////////////AFFICHAGE///////////////////////////////////////////
  
@@ -142,27 +168,25 @@ void PacmanWindow::paintEvent(QPaintEvent *)
     }
     else if (etatJeu == FIN)//affichage fin du jeu
     {
-        /*QPixmap p = pixmapPacman[1];
-        for (int i=0;i<jeu.getNbCasesX();i++)
-        {
-            painter.drawPixmap(i*largeurCase, (jeu.getNbCasesY()/4)*hauteurCase, p);
-            painter.drawPixmap(i*largeurCase, (jeu.getNbCasesY()/4)*hauteurCase*4, p);
-        }*/
-
+        
         //On cache les boutons
-        btnAjoutFantome->hide();
-        btnRetraitFantome->hide();
-        btnPause->hide();
-        btnFin->hide();
+        if (btnAjoutFantome!= nullptr)
+        {
+            btnAjoutFantome->hide();
+            btnRetraitFantome->hide();
+            btnPause->hide();
+            btnFin->hide();
+        }
         // on change le fond et on écrit le texte final
         this->setStyleSheet("background-color: rgb(153, 115, 0);");//change la couleur du fond
-        painter.setFont(QFont(PacmanFont, 60));
+        painter.setFont(QFont(PacmanFont, 50));
         painter.drawText(rect(), Qt::AlignCenter, tr("100000000000000009\n\nFIN DU JEU\n\n100000000000000009"));// 1,0,9 correspondent a des images
 
 
     }
     else if(etatJeu==PAUSE)
     {   
+
         painter.drawPixmap(0, 0, pixmapJeu);
         // Calculer les coordonnées du centre de l'écran
         int centerX = jeu.getNbCasesX()*largeurCase/2;
@@ -179,6 +203,12 @@ void PacmanWindow::paintEvent(QPaintEvent *)
         painter.fillRect(rectangle, Qt::gray);
         painter.drawText(rectangle, Qt::AlignCenter, tr("PAUSE"));
 
+    }
+    else if(etatJeu==MENU)
+    {
+        painter.drawPixmap(0,0,pixmapMenu);
+        // Calculer les coordonnées du centre de l'écran
+        
     }
 
     // Créer un QPixmap et dessiner l'image sur le pixmap
@@ -238,6 +268,7 @@ void PacmanWindow::finDeJeu(){
 
     QTimer::singleShot(3000, this, &PacmanWindow::close);
     etatJeu = FIN;
+    timerJeu->stop();
 }
 
 void PacmanWindow::Pause(){
@@ -277,6 +308,19 @@ void PacmanWindow::screenShot() {//prend un screen du jeu et pas de la fenettre 
     QString pathImage = "screen/image-" + currentDateTimeString + ".png";
 
     pixmapJeu.save(pathImage);//Sauvegarde de l'image de jeu
+
+}
+bool PacmanWindow::lancerJeu()
+{
+    btnLancerJeu->hide();
+    btnQuitter->hide();
+
+    btnAjoutFantome->show();
+    btnRetraitFantome->show();
+    btnPause->show();
+    btnFin->show();
+
+    init();
 
 }
 void PacmanWindow::ajoutFantome() {
@@ -356,6 +400,11 @@ void PacmanWindow::initImages()
     if (pixmapVide.load("./data/background.bmp")==false)
     {
         cout<<"Impossible d'ouvrir mur.bmp"<<endl;
+        exit(-1);
+    }
+    if (pixmapMenu.load("./data/PacmanMenu.png")==false)
+    {
+        cout<<"Impossible d'ouvrir PacmanMenu.png"<<endl;
         exit(-1);
     }
 }
