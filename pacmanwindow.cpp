@@ -159,7 +159,6 @@ void PacmanWindow::paintEvent(QPaintEvent *)
         painter.setFont(QFont(PacmanFont, 60));
         painter.drawText(rect(), Qt::AlignCenter, tr("100000000000000009\n\nFIN DU JEU\n\n100000000000000009"));// 1,0,9 correspondent a des images
 
-        QTimer::singleShot(3000, this, &PacmanWindow::close);
 
     }
     else if(etatJeu==PAUSE)
@@ -204,18 +203,21 @@ void PacmanWindow::paintEvent(QPaintEvent *)
 
 void PacmanWindow::keyPressEvent(QKeyEvent *event)
 {
-    if (event->key()==Qt::Key_Left)
-        jeu.setDirPacman(GAUCHE);
-    else if (event->key()==Qt::Key_Right)
-        jeu.setDirPacman(DROITE);
-    else if (event->key()==Qt::Key_Up)
-        jeu.setDirPacman(HAUT);
-    else if (event->key()==Qt::Key_Down)
-        jeu.setDirPacman(BAS);
-    else if (event->key()==Qt::Key_Escape || event->key()==Qt::Key_P )
-        Pause();
-    else if (event->key()==Qt::Key_F2)
-        screenShot();
+    if (etatJeu!=FIN)
+    {
+        if (event->key()==Qt::Key_Left)
+            jeu.setDirPacman(GAUCHE);
+        else if (event->key()==Qt::Key_Right)
+            jeu.setDirPacman(DROITE);
+        else if (event->key()==Qt::Key_Up)
+            jeu.setDirPacman(HAUT);
+        else if (event->key()==Qt::Key_Down)
+            jeu.setDirPacman(BAS);
+        else if (event->key()==Qt::Key_Escape || event->key()==Qt::Key_P )
+            Pause();
+        else if (event->key()==Qt::Key_F2)
+            screenShot();
+    }
 }
 
 void PacmanWindow::handleTimerJeu()
@@ -234,7 +236,7 @@ void PacmanWindow::handleTimerAffichage()
 
 void PacmanWindow::finDeJeu(){
 
-
+    QTimer::singleShot(3000, this, &PacmanWindow::close);
     etatJeu = FIN;
 }
 
