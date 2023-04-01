@@ -27,20 +27,25 @@ class PacmanWindow : public QFrame
 
     QTimer *timerAffichage, *timerJeu;//timer 
     int timerAffichageInterval=40, timerJeuInterval=20;//interval des timers
+    bool animation=false;//variable qui définit si les animations sont activées ou non
 
     QString PacmanFont;//Police
 
   public:
     PacmanWindow(QWidget *pParent=0, Qt::WindowFlags flags=Qt::WindowFlags());
+    //méthodes de gestion des timers:
     void handleTimerJeu();
     void handleTimerAffichage();
+    void lancerTimerJeu();
+
     void ajoutFantome();
     void retraitFantome();
-    void finDeJeu();
+
+    void finDeJeu();//Méthode qui gère la fin du jeu
     void Pause();//Met sur pause ou sur play le jeu
 
     // méthode d'initialisation:
-    bool initJeu();
+    bool initJeu();// initialise le jeu
     bool initBtn();// initialise les boutons et les caches
     bool initImages();// initialise les images
     bool initTimer();// initialise les timers
@@ -53,8 +58,8 @@ class PacmanWindow : public QFrame
     bool affichageFin(QPainter*);
     bool affichageMenu(QPainter*);
 
-
     void screenShot();
+
   protected:
     void paintEvent(QPaintEvent *);
     void keyPressEvent(QKeyEvent *);

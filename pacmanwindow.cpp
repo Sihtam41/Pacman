@@ -11,8 +11,7 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     initTimer();
     initMenu();
 
-    setWindowTitle("Pacman");
-    SetWindowDisplayAffinity(GetConsoleWindow(), 1);
+    setWindowTitle("Pacman");//Titre de la fenêtre
 
     QIcon myIcon("./data/icon.png"); // Créer un objet QIcon à partir de l'image
     setWindowIcon(myIcon); // Définir l'icône de la fenêtre
@@ -101,10 +100,10 @@ void PacmanWindow::handleTimerAffichage()
 
 void PacmanWindow::finDeJeu(){
 
-    QTimer::singleShot(3000, this, &PacmanWindow::close);
+    QTimer::singleShot(3000, this, initMenu);
     etatJeu = FIN;
-    if (timerJeu!= nullptr)//Si le timer Jeu a été crée on arrête le timer du jeu
-        timerJeu->stop();
+    timerJeu->stop();
+    animation=false;
     update();
 }
 
@@ -162,6 +161,12 @@ void PacmanWindow::ajoutFantome() {
 void PacmanWindow::retraitFantome() {
 
     jeu.RetraitFantome();
+}
+
+void PacmanWindow::lancerTimerJeu()
+{
+    timerJeu->start(timerJeuInterval);
+    animation=true;
 }
 
 PacmanButton::PacmanButton(const QString &text, QWidget *parent) : QPushButton(text,parent)
@@ -235,8 +240,12 @@ bool PacmanWindow::afficheJeu(QPainter* painter)
 
     painter->drawPixmap(jeu.getPacmanX()*largeurCase, (jeu.getPacmanY()+1)*hauteurCase, p);
     // prochaine image du pacman
-    imagePacman++;
-    imagePacman%=4;
+    if (animation)//si l'animation est activée
+    {
+        imagePacman++;
+        imagePacman%=4;
+    }
+
     
     return true;
 
@@ -306,8 +315,6 @@ bool PacmanWindow::initJeu()
     btnFin->show();
     btnQuitter->hide();
     btnLancerJeu->hide();
-
-    timerJeu->start(timerJeuInterval);//start du timerJeu
     
     this->setStyleSheet("background-color: rgb(80, 80, 80);");//Couleur de fond
 
@@ -319,9 +326,11 @@ bool PacmanWindow::initJeu()
     int largeurCase = pixmapMur.width();
     int hauteurCase = pixmapMur.height();
 
-    resize(jeu.getNbCasesX()*largeurCase, jeu.getNbCasesY()*(hauteurCase+2));
+    resize(jeu.getNbCasesX()*largeurCase, jeu.getNbCasesY()*(hauteurCase+2));//redimensionne la fenetre
 
-    update();
+     QTimer::singleShot(2000, this, lancerTimerJeu); // lance le timer Jeu  après 2s
+
+
 
     return true;
 }
@@ -331,8 +340,13 @@ bool PacmanWindow::initMenu()
     etatJeu = MENU;
 
     this->move(100, 100);
+    this->setStyleSheet("background-color: rgb(0, 0, 0);");//Couleur de fond
     resize(976,800);
 
+    btnPause->hide();
+    btnFin->hide();
+    btnAjoutFantome->hide();
+    btnRetraitFantome->hide();
     btnLancerJeu->show();
     btnQuitter->show();
     
@@ -354,7 +368,7 @@ bool PacmanWindow::initBtn()
 
     btnQuitter = new PacmanButton("", this);
     btnQuitter->setGeometry(318,601,330,110);
-    connect(btnQuitter, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
+    connect(btnQuitter, &QPushButton::clicked, this, &PacmanWindow::close);
     btnQuitter->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
     btnQuitter->hide();
 
