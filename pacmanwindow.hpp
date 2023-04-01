@@ -19,14 +19,16 @@ class PacmanWindow : public QFrame
     QPixmap pixmapJeu;
     QPixmap pixmapMenu;
     int imagePacman;
-    EtatJeu etatJeu=MENU;
+    EtatJeu etatJeu;
 
+    //Boutons
     PacmanButton *btnPause, *btnFin, *btnAjoutFantome, *btnRetraitFantome;
     PacmanButton *btnLancerJeu, *btnQuitter;
 
-    QTimer *timerAffichage, *timerJeu;
+    QTimer *timerAffichage, *timerJeu;//timer 
+    int timerAffichageInterval=40, timerJeuInterval=20;//interval des timers
 
-    QString PacmanFont;
+    QString PacmanFont;//Police
 
   public:
     PacmanWindow(QWidget *pParent=0, Qt::WindowFlags flags=Qt::WindowFlags());
@@ -36,9 +38,22 @@ class PacmanWindow : public QFrame
     void retraitFantome();
     void finDeJeu();
     void Pause();//Met sur pause ou sur play le jeu
-    bool init();
-    bool lancerJeu();
-    void initImages();
+
+    // méthode d'initialisation:
+    bool initJeu();
+    bool initBtn();// initialise les boutons et les caches
+    bool initImages();// initialise les images
+    bool initTimer();// initialise les timers
+    bool initFont();// initialise la police
+    bool initMenu();// initialise le jeu
+
+    // méthode d'affichage:
+    bool afficheJeu(QPainter*);
+    bool affichagePause(QPainter*);
+    bool affichageFin(QPainter*);
+    bool affichageMenu(QPainter*);
+
+
     void screenShot();
   protected:
     void paintEvent(QPaintEvent *);
