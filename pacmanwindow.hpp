@@ -25,11 +25,11 @@ class PacmanWindow : public QFrame
     PacmanButton *btnPause, *btnFin, *btnAjoutFantome, *btnRetraitFantome;
     PacmanButton *btnLancerJeu, *btnQuitter;
 
-    QTimer *timerAffichage, *timerJeu;//timer 
+    QTimer *timerAffichage, *timerJeu;//timer
     int timerAffichageInterval=40, timerJeuInterval=20;//interval des timers
     bool animation=false;//variable qui définit si les animations sont activées ou non
 
-    QString PacmanFont;//Police
+    QString PacmanFontFile;// chemin vers la police d'écriture
 
   public:
     PacmanWindow(QWidget *pParent=0, Qt::WindowFlags flags=Qt::WindowFlags());

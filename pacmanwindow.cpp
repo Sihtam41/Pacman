@@ -15,11 +15,11 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
 
     QIcon myIcon("./data/icon.png"); // Créer un objet QIcon à partir de l'image
     setWindowIcon(myIcon); // Définir l'icône de la fenêtre
-    
+
 }
 
 ///////////////////////////////////////////AFFICHAGE///////////////////////////////////////////
- 
+
 void PacmanWindow::paintEvent(QPaintEvent *)
 {
     // Créer une image de la taille de la fenêtre
@@ -36,13 +36,13 @@ void PacmanWindow::paintEvent(QPaintEvent *)
         affichageFin(&painter);
     }
     else if(etatJeu==PAUSE)
-    {   
+    {
         affichagePause(&painter);
-        
+
     }
     else if(etatJeu==MENU)
     {
-        painter.drawPixmap(0,0,pixmapMenu);        
+        painter.drawPixmap(0,0,pixmapMenu);
     }
 
     // Créer un QPixmap et dessiner l'image sur le pixmap
@@ -129,7 +129,7 @@ void PacmanWindow::Pause(){
 
 void PacmanWindow::screenShot() {//prend un screen du jeu et pas de la fenettre courante
     cout<<"screenshot"<<endl;
-    
+
 
     QString path = QCoreApplication::applicationDirPath() +"/screen";
 
@@ -246,14 +246,14 @@ bool PacmanWindow::afficheJeu(QPainter* painter)
         imagePacman%=4;
     }
 
-    
+
     return true;
 
 }
 
 bool PacmanWindow::affichageFin(QPainter* painter)
-{   
-        
+{
+
     //On cache les boutons
     if (btnAjoutFantome!= nullptr)
     {
@@ -265,7 +265,7 @@ bool PacmanWindow::affichageFin(QPainter* painter)
 
     // on change le fond et on écrit le texte final
     this->setStyleSheet("background-color: rgb(153, 115, 0);");//change la couleur du fond
-    painter->setFont(QFont(PacmanFont, 50));
+    painter->setFont(QFont(PacmanFontFile, 50));
     painter->drawText(rect(), Qt::AlignCenter, tr("100000000000000009\n\nFIN DU JEU\n\n100000000000000009"));// 1,0,9 correspondent a des images
 
     return true;
@@ -275,7 +275,7 @@ bool PacmanWindow::affichageFin(QPainter* painter)
 bool PacmanWindow::affichagePause(QPainter* painter)
 {
     painter->drawPixmap(0, 0, pixmapJeu);//affiche l'image de jeu
-    
+
     // Taille des cases en pixels
     int largeurCase, hauteurCase;
 
@@ -292,7 +292,7 @@ bool PacmanWindow::affichagePause(QPainter* painter)
     // Créer un QRect centré sur la fenêtre
     QRect rectangle(centerX - lrect / 2, centerY - hrect / 2, lrect, hrect);
 
-    painter->setFont(QFont(PacmanFont, 50));//définit la police et la taille du texte
+    painter->setFont(QFont(PacmanFontFile, 50));//définit la police et la taille du texte
     painter->fillRect(rectangle, Qt::gray);
     painter->drawText(rectangle, Qt::AlignCenter, tr("PAUSE"));
 }
@@ -315,12 +315,12 @@ bool PacmanWindow::initJeu()
     btnFin->show();
     btnQuitter->hide();
     btnLancerJeu->hide();
-    
+
     this->setStyleSheet("background-color: rgb(80, 80, 80);");//Couleur de fond
 
     jeu.init();//Initialisation du jeu
 
-    
+
 
     // Taille des cases en pixels
     int largeurCase = pixmapMur.width();
@@ -349,8 +349,8 @@ bool PacmanWindow::initMenu()
     btnRetraitFantome->hide();
     btnLancerJeu->show();
     btnQuitter->show();
-    
-    
+
+
 
     return true;
 }
@@ -396,9 +396,9 @@ bool PacmanWindow::initBtn()
     btnFin->setStyleSheet("background-color: white");
     connect(btnFin, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
     btnFin->hide();
-        
+
     return true;
-    
+
 }
 bool PacmanWindow::initTimer()
 {
@@ -412,13 +412,8 @@ bool PacmanWindow::initTimer()
 
 bool PacmanWindow::initFont()
 {
-    /////////////////// Charger une police depuis le fichier/////////////////////
-    // Charger la police depuis le fichier
-    QString fontFile = QApplication::applicationDirPath() + "/PAC-FONT.TTF";
-    int fontId = QFontDatabase::addApplicationFont(fontFile);
-    // Récupérer le nom de la police
-    PacmanFont = QFontDatabase::applicationFontFamilies(fontId).at(0);
-
+    int id = QFontDatabase::addApplicationFont("./PAC-FONT.TTF");//Chargement de la police
+    PacmanFontFile = QFontDatabase::applicationFontFamilies(id).at(0);//Récupération du nom de la police
     return true;
 }
 
