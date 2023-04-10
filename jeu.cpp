@@ -3,6 +3,9 @@
 #include <algorithm>
 #include <math.h>
 #include "jeu.hpp"
+#include "pacmanwindow.hpp"
+
+#include <unistd.h>
 
 using namespace std;
 
@@ -37,6 +40,7 @@ Jeu::Jeu()
     largeur = 0; hauteur = 0;
     posPacmanX = 0; posPacmanY = 0;
     dirPacman = DROITE;
+    invincible=false;
 }
 
 Jeu::Jeu(const Jeu &jeu):fantomes(jeu.fantomes)
@@ -88,6 +92,7 @@ bool Jeu::init()
 {
 	int x, y;
 	list<Fantome>::iterator itFantome;
+	list<PacBalls>::iterator itPacballs;
 
 	/*const char terrain_defaut[15][21] = {
 		"####################",
@@ -124,12 +129,12 @@ bool Jeu::init()
             "#####################"
         };
         //on définit l'entrée et la sortie des deux portails
-        
+
 
         portail.resize(2);//définit le nombre de fantomes au lacement du niveau
         portail.push_back({-1,1,20,13});
-        portail.push_back({21,13,0,1});        
-        
+        portail.push_back({21,13,0,1});
+
         //Portail[1] = {20,1};
        /* const char terrain_defaut[15][22] = {
         "#####################",
@@ -157,7 +162,7 @@ bool Jeu::init()
 	terrain = new Case[largeur*hauteur];
 
     generator.setWorldSize({largeur, hauteur});// met en place la taille du terrain pour l'algo Astar
-    
+
 	for(y=0;y<hauteur;++y)
 		for(x=0;x<largeur;++x)
             if (terrain_defaut[y][x]=='#')
@@ -191,6 +196,19 @@ bool Jeu::init()
         itFantome->dir = (Direction)(rand()%4);
     }
 
+    list_pacballs.resize(3);
+
+    for (itPacballs=list_pacballs.begin(); itPacballs!=list_pacballs.end(); itPacballs++)
+    {
+        do {
+            x = rand()%largeur;
+            y = rand()%hauteur;
+        } while (terrain[y*largeur+x]!=VIDE);
+
+        itPacballs->posX = x;
+        itPacballs->posY = y;
+    }
+
 
     return true;
 }
@@ -203,6 +221,7 @@ void Jeu::evolue()
     ////////////////////////////////Deplacement des fantomes///////////////////////////////
     int testX, testY;
 	list<Fantome>::iterator itFantome;
+	list<PacBalls>::iterator itPacballs;
 
     int depX[] = {-1, 1, 0, 0};
     int depY[] = {0, 0, -1, 1};
@@ -292,12 +311,12 @@ void Jeu::evolue()
                             itFantome->dir = (Direction)(rand()%4);
                            }
 
-                        
 
-                        
 
-                        
-                            
+
+
+
+
                     }
                     else if (itFantome->comportement==CHASSEUR)// Ne fonctione pas super bien
                     {
@@ -318,7 +337,7 @@ void Jeu::evolue()
                         else
                             itFantome->dir = (Direction)(rand()%4);
 
-                        
+
                         Dir_test.push_back(itFantome->dir);
                     }
                     else if (itFantome->comportement==TRAQUEUR)//Fonctionnel
@@ -326,7 +345,7 @@ void Jeu::evolue()
                         auto path = generator.findPath({itFantome->posX,itFantome->posY}, {posPacmanX, posPacmanY});// créer le chemin
                         if (path.size()>1)// qaund il a trouvé un chemin supérieur à 1
                         {
-                            int curseurProchainDeplacement= path.size()-2;// cherche l'avant dernier case qui correspond au prochain déplacement 
+                            int curseurProchainDeplacement= path.size()-2;// cherche l'avant dernier case qui correspond au prochain déplacement
                             if (path[curseurProchainDeplacement].x>itFantome->posX)// si il doit aller à droite
                                 itFantome->dir = DROITE;
                             else if (path[curseurProchainDeplacement].x<itFantome->posX)
@@ -414,7 +433,7 @@ void Jeu::evolue()
                         }
                         else
                             PACMAN_VU = false;//le fantome n'a pas vu le pacman
-                        
+
                         if (PACMAN_VU==false)//Comme le comportenement ALEATOIRE
                         {
                             int testX2 = itFantome->posX + depX[itFantome->dir];
@@ -422,9 +441,9 @@ void Jeu::evolue()
                             if (terrain[testY2*largeur+testX2]!=VIDE)//si le fantome ne va pas sur un mur
                                 itFantome->dir = (Direction)(rand()%4);
                         }
-                            
+
                     }
-                
+
 
                 testX = itFantome->posX + depX[itFantome->dir];
                 testY = itFantome->posY + depY[itFantome->dir];
@@ -438,13 +457,13 @@ void Jeu::evolue()
                 }
             }
         }
-           
+
 
     }
 //////////////////////////////////////////////////////////////////////////////////////////
 
     deplacePacman(dirPacman);
-
+    collisionPacballs();
     finJeu=colisionPacmanFantome();
 }
 //Note: les colision ne sont pas parfaite car si le pacman et un fantome se colle et ensuite qu'ils vont tout les deux l'un vers l'autre, alors il n'y a pas de colision
@@ -461,8 +480,12 @@ bool Jeu::colisionPacmanFantome()
         {
             if (invincible==false)
                 return true;
-            else
+            else if(invincible==true)
+            {
                 fantomes.erase(itFantome);
+                score=score+1;
+                return false;
+            }
         }
     }
 
@@ -508,6 +531,11 @@ const std::list<Fantome> &Jeu::getFantomes() const
     return fantomes;
 }
 
+std::list<PacBalls> &Jeu::getPacBalls()
+{
+    return list_pacballs;
+}
+
 bool Jeu::posValide(int x, int y) const
 {
     return (x>=0 && x<largeur && y>=0 && y<hauteur && terrain[y*largeur+x]==VIDE);
@@ -550,7 +578,7 @@ bool Jeu::deplacePacman(Direction dir)
     }
     else//Si le pacman ne peut pas se deplacer
         return false;
-        
+
 }
 
 Coord Jeu::Teleportation(int x, int y)
@@ -567,7 +595,7 @@ Coord Jeu::Teleportation(int x, int y)
 
     return c;
 }
-bool Jeu::posPortail(int x, int y) 
+bool Jeu::posPortail(int x, int y)
 {
     list<Portail>::iterator itPortail;
 	for (itPortail=portail.begin(); itPortail!=portail.end(); itPortail++)
@@ -604,4 +632,65 @@ void Jeu::AjoutFantome()
         newFantome.dir = (Direction)(rand()%4);
 
     fantomes.push_back(newFantome);
+}
+
+PacBalls::PacBalls()
+{
+    posX=0;
+    posY=0;
+}
+
+int PacBalls::getPosX() const
+{
+    return posX;
+}
+
+int PacBalls::getPosY() const
+{
+    return posY;
+}
+
+void Jeu::collisionPacballs()
+{
+	list<PacBalls>::iterator itPacballs;
+
+    //timer qui gere le temps de l'effet d'invincibilité
+    QTimer *timerColision = new QTimer(this);
+    connect(timerColision, &QTimer::timeout, this, &Jeu::ArretInvincibilite);
+    timerColision->setSingleShot(true);
+
+    for (itPacballs=list_pacballs.begin(); itPacballs!=list_pacballs.end(); itPacballs++)
+    {
+        if ((itPacballs->posX == posPacmanX) && (itPacballs->posY == posPacmanY) && (invincible==false))
+        {
+            //Quand on mange une PacBalls, on est invincible pendant 10s, on ne peut pas manger d'autre pacballs si on est déjà invincible.
+            cout<<"Vous etes invincible pour 10s"<<endl;
+            list_pacballs.erase(itPacballs);
+
+            timerColision->stop();
+            timerColision->start(10000);
+
+            invincible=true;
+        }
+    }
+}
+
+void Jeu::ArretInvincibilite()
+{
+    if (invincible==true)
+    {
+        invincible=false;
+        cout<<"Vous n'etes plus invincible"<<endl;
+    }
+}
+
+
+int Jeu::getScore() const
+{
+    return score;
+}
+
+bool Jeu::getInvincibilite() const
+{
+    return invincible;
 }
