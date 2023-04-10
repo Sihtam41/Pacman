@@ -1,6 +1,9 @@
 #ifndef JEU_HPP
 #define JEU_HPP
 
+#include <QtCore/QtCore>
+#include <QtWidgets/QtWidgets>
+
 #include <list>
 #include "AStar.hpp"
 
@@ -37,7 +40,20 @@ class Fantome
     EtatFantome getComportement() const {return comportement;}
 };
 
-class Jeu
+class PacBalls
+{
+    friend class Jeu;
+
+    protected:
+        int posX, posY;
+
+    public:
+        PacBalls();
+        int getPosX() const;
+        int getPosY() const;
+};
+
+class Jeu : public QFrame
 {
   protected:
     Case *terrain;
@@ -49,6 +65,8 @@ class Jeu
     bool invincible=false;
     bool finJeu=false;
     std::list<Fantome> fantomes;
+    std::list<PacBalls> list_pacballs;
+    int score=0; 
     uint32_t Frame=0;//définit le nombre de Frame écoulé depuis le début du cycle (sert à définir la vitesse)
 
     std::list<Portail> portail;//liste des portails
@@ -80,6 +98,8 @@ class Jeu
 
     // Retourne la liste de fantomes en lecture seule
     const std::list<Fantome> &getFantomes() const;
+    //liste des pacballs
+    std::list<PacBalls> &getPacBalls();
     //Distance entre deux points
     float Distance(int, int, int, int);
     // Indique si la case � une position donn�e existe et est vide
@@ -99,8 +119,14 @@ class Jeu
     void AjoutFantome();
     //Rrtourne vrai si il y a une colision entre un fantome et pacman, sinon retourne faux 
     bool colisionPacmanFantome();
+    
+    //Test la collision entre le pacman et les pacballs
+    void collisionPacballs();
+    void ArretInvincibilite();
+    bool getInvincibilite() const;
 
-
+    //Gestion du score
+    int getScore() const;    
 };
 
 #endif
