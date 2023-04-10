@@ -17,6 +17,7 @@ class PacmanWindow : public QFrame
     QPixmap pixmapPacman [4];
     QPixmap pixmapFantomeRouge, pixmapFantomeCyan, pixmapFantomeOrange, pixmapFantomeFuyard;
     QPixmap pixmapJeu;
+    QPixmap pixmapPacball;
     QPixmap pixmapMenu;
     int imagePacman;
     EtatJeu etatJeu;
@@ -28,6 +29,8 @@ class PacmanWindow : public QFrame
     QTimer *timerAffichage, *timerJeu;//timer
     int timerAffichageInterval=40, timerJeuInterval=20;//interval des timers
     bool animation=false;//variable qui définit si les animations sont activées ou non
+
+    QLabel *AffichageScore, *valeurScore;
 
     QString PacmanFontFile;// chemin vers la police d'écriture
 
@@ -57,6 +60,8 @@ class PacmanWindow : public QFrame
     bool affichagePause(QPainter*);
     bool affichageFin(QPainter*);
     bool affichageMenu(QPainter*);
+
+    void ActualiserScore();
 
     void screenShot();
 
