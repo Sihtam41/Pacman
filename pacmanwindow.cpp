@@ -1,5 +1,6 @@
 #include <iostream>
 #include "pacmanwindow.hpp"
+#include "jeu.hpp"
 
 using namespace std;
 
@@ -223,6 +224,13 @@ bool PacmanWindow::afficheJeu(QPainter* painter)
         }
         painter->drawPixmap(itFantome->getPosX()*largeurCase, (itFantome->getPosY()+1)*hauteurCase, pixmapFanome);
     }
+
+    //dessine les pacballs
+    list<PacBalls> &yep = jeu.getPacBalls();
+    list<PacBalls>::iterator itPacballs;
+    for (itPacballs=yep.begin(); itPacballs!=yep.end(); itPacballs++)
+        painter.drawPixmap(itPacballs->getPosX()*largeurCase, (itPacballs->getPosY()+1)*hauteurCase, pixmapPacball);
+
     // Dessine Pacman en fonction de la direction:
     int rot;
     if (jeu.getDirPacman()==DROITE)
@@ -330,7 +338,20 @@ bool PacmanWindow::initJeu()
 
      QTimer::singleShot(2000, this, lancerTimerJeu); // lance le timer Jeu  après 2s
 
+    //affichage du score
+    QFont font("Times", 9, QFont::Bold);
 
+    AffichageScore = new QLabel(this);
+    AffichageScore->setText("score :");
+    AffichageScore->setGeometry(360, 2.5, 150, hauteurCase-5);
+    AffichageScore->setStyleSheet("color : white");
+    AffichageScore->setFont(font);
+
+    valeurScore = new QLabel(this);
+    valeurScore->setText("0");
+    valeurScore->setGeometry(430, 2.5, 150, hauteurCase-5);
+    valeurScore->setStyleSheet("color : white");
+    valeurScore->setFont(font);
 
     return true;
 }
@@ -463,6 +484,12 @@ bool PacmanWindow::initImages()
         cout<<"Impossible d'ouvrir fuyard.png"<<endl;
         exit(-1);
     }
+    //image pacball
+    if (pixmapPacball.load("./data/pacBall.bmp")==false)
+    {
+        cout<<"Impossible d'ouvrir pacBall.bmp"<<endl;
+        exit(-1);
+    }
 
 
     if (pixmapMur.load("./data/greystone.png")==false)
@@ -481,6 +508,12 @@ bool PacmanWindow::initImages()
         exit(-1);
     }
     return true;
+}
+
+void PacmanWindow::ActualiserScore()
+{
+    valeurScore->setText(QString::number(jeu.getScore()));
+
 }
 
 
