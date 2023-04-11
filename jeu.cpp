@@ -21,6 +21,7 @@ Fantome::Fantome()
     else//50% de chance d'être ALÉATOIRE
         comportement = ALEATOIRE;
 
+    comportementActuel = comportement;
 }
 
 int Fantome::getPosX() const
@@ -210,6 +211,12 @@ bool Jeu::init()
     }
 
 
+
+    //timer qui gere le temps de l'effet d'invincibilité
+    timerInvincible = new QTimer(this);
+    connect(timerInvincible, &QTimer::timeout, this, &Jeu::ArretInvincibilite);
+    timerInvincible->setSingleShot(true);
+
     return true;
 }
 
@@ -235,7 +242,7 @@ void Jeu::evolue()
             list<Direction> Dir_test;
             while (!deplace)
             {
-                    if (itFantome->comportement==ALEATOIRE)// le fantomes va changer de direction de façon aléatoire si il rencontre un mur
+                    if (itFantome->comportementActuel==ALEATOIRE)// le fantomes va changer de direction de façon aléatoire si il rencontre un mur
                     {
                         int testX2 = itFantome->posX + depX[itFantome->dir];
                         int testY2 = itFantome->posY + depY[itFantome->dir];
@@ -243,7 +250,7 @@ void Jeu::evolue()
                             itFantome->dir = (Direction)(rand()%4);
                     }
 
-                    else if (itFantome->comportement==FUYARD)//Fonctionne mais pas forcément super
+                    else if (itFantome->comportementActuel==FUYARD)//Fonctionne mais pas forcément super
                     //Indiquer la direction que le fantome ne peut pas prendre et non choisir la direction dans laquelle il doit aller
                     {
                         int x=itFantome->posX;
@@ -311,41 +318,19 @@ void Jeu::evolue()
                             itFantome->dir = (Direction)(rand()%4);
                            }
 
+                        
 
+                        
 
-
-
-
-
+                        
+                            
                     }
-                    else if (itFantome->comportement==CHASSEUR)// Ne fonctione pas super bien
-                    {
-
-                        auto it_DROITE = find(Dir_test.begin(), Dir_test.end(), DROITE);
-                        auto it_GAUCHE = find(Dir_test.begin(), Dir_test.end(), GAUCHE);
-                        auto it_HAUT = find(Dir_test.begin(), Dir_test.end(), HAUT);
-                        auto it_BAS = find(Dir_test.begin(), Dir_test.end(), BAS);
-                        // Déplacement vers le pacman
-                        if (itFantome->posX<posPacmanX && it_DROITE == Dir_test.end())
-                            itFantome->dir = DROITE;
-                        else if (itFantome->posX>posPacmanX && it_GAUCHE == Dir_test.end())
-                            itFantome->dir = GAUCHE;
-                        else if (itFantome->posY<posPacmanY && it_BAS == Dir_test.end())
-                            itFantome->dir = BAS;
-                        else if (itFantome->posY>posPacmanY && it_HAUT == Dir_test.end())
-                            itFantome->dir = HAUT;
-                        else
-                            itFantome->dir = (Direction)(rand()%4);
-
-
-                        Dir_test.push_back(itFantome->dir);
-                    }
-                    else if (itFantome->comportement==TRAQUEUR)//Fonctionnel
+                    else if (itFantome->comportementActuel==TRAQUEUR)//Fonctionnel
                     {
                         auto path = generator.findPath({itFantome->posX,itFantome->posY}, {posPacmanX, posPacmanY});// créer le chemin
                         if (path.size()>1)// qaund il a trouvé un chemin supérieur à 1
                         {
-                            int curseurProchainDeplacement= path.size()-2;// cherche l'avant dernier case qui correspond au prochain déplacement
+                            int curseurProchainDeplacement= path.size()-2;// cherche l'avant dernier case qui correspond au prochain déplacement 
                             if (path[curseurProchainDeplacement].x>itFantome->posX)// si il doit aller à droite
                                 itFantome->dir = DROITE;
                             else if (path[curseurProchainDeplacement].x<itFantome->posX)
@@ -360,7 +345,7 @@ void Jeu::evolue()
 
 
                     }
-                    else if (itFantome->comportement==OBSERVATEUR)//Fonctionnel
+                    else if (itFantome->comportementActuel==OBSERVATEUR)//Fonctionnel
                     {
                         int x=itFantome->posX;
                         int y=itFantome->posY;
@@ -433,7 +418,7 @@ void Jeu::evolue()
                         }
                         else
                             PACMAN_VU = false;//le fantome n'a pas vu le pacman
-
+                        
                         if (PACMAN_VU==false)//Comme le comportenement ALEATOIRE
                         {
                             int testX2 = itFantome->posX + depX[itFantome->dir];
@@ -441,9 +426,9 @@ void Jeu::evolue()
                             if (terrain[testY2*largeur+testX2]!=VIDE)//si le fantome ne va pas sur un mur
                                 itFantome->dir = (Direction)(rand()%4);
                         }
-
+                            
                     }
-
+                
 
                 testX = itFantome->posX + depX[itFantome->dir];
                 testY = itFantome->posY + depY[itFantome->dir];
@@ -483,7 +468,7 @@ bool Jeu::colisionPacmanFantome()
             else if(invincible==true)
             {
                 fantomes.erase(itFantome);
-                score=score+1;
+                score=score+100;
                 return false;
             }
         }
@@ -627,9 +612,12 @@ void Jeu::AjoutFantome()
             y = rand()%hauteur;
         } while (terrain[y*largeur+x]!=VIDE);
 
-        newFantome.posX = x;
-        newFantome.posY = y;
-        newFantome.dir = (Direction)(rand()%4);
+    newFantome.posX = x;
+    newFantome.posY = y;
+    newFantome.dir = (Direction)(rand()%4);
+
+    if (invincible==true)//si le pacman est invincible, alors les fantomes sont fuyard
+        newFantome.comportementActuel = FUYARD;
 
     fantomes.push_back(newFantome);
 }
@@ -654,10 +642,7 @@ void Jeu::collisionPacballs()
 {
 	list<PacBalls>::iterator itPacballs;
 
-    //timer qui gere le temps de l'effet d'invincibilité
-    QTimer *timerColision = new QTimer(this);
-    connect(timerColision, &QTimer::timeout, this, &Jeu::ArretInvincibilite);
-    timerColision->setSingleShot(true);
+
 
     for (itPacballs=list_pacballs.begin(); itPacballs!=list_pacballs.end(); itPacballs++)
     {
@@ -667,12 +652,20 @@ void Jeu::collisionPacballs()
             cout<<"Vous etes invincible pour 10s"<<endl;
             list_pacballs.erase(itPacballs);
 
-            timerColision->stop();
-            timerColision->start(10000);
+            timerInvincible->stop();
+            timerInvincible->start(10000);
 
             invincible=true;
+
+                //on change le comportement des fantômes
+            list<Fantome>::iterator itFantome;
+            for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
+            {
+                itFantome->comportementActuel=FUYARD;
+            }
         }
     }
+
 }
 
 void Jeu::ArretInvincibilite()
@@ -681,6 +674,13 @@ void Jeu::ArretInvincibilite()
     {
         invincible=false;
         cout<<"Vous n'etes plus invincible"<<endl;
+    }
+
+    //on change le comportement des fantômes
+    list<Fantome>::iterator itFantome;
+    for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
+    {
+        itFantome->comportementActuel=itFantome->comportement;
     }
 }
 

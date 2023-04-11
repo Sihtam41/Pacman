@@ -9,7 +9,7 @@
 
 typedef enum {VIDE, MUR} Case;
 typedef enum {GAUCHE, DROITE, HAUT, BAS} Direction;
-typedef enum {FUYARD, CHASSEUR, ALEATOIRE, OBSERVATEUR, TRAQUEUR} EtatFantome;
+typedef enum {FUYARD, ALEATOIRE, OBSERVATEUR, TRAQUEUR} EtatFantome;
 
 class Jeu;
 
@@ -30,7 +30,8 @@ class Fantome
   protected:
     int posX, posY;
     Direction dir;
-    EtatFantome comportement;// permet de définir différents comportement du fantomes 0=direction aléatoire 1=cherche pacman
+    EtatFantome comportement;// permet de définir différents comportement du fantomes 
+    EtatFantome comportementActuel;// permet de définir le comportement actuel du fantome
 
   public:
     Fantome();
@@ -38,6 +39,7 @@ class Fantome
     int getPosY() const;
     int vitFantome=4;// la vitesse maximale est de 10
     EtatFantome getComportement() const {return comportement;}
+    EtatFantome getComportementActuel() const {return comportementActuel;}
 };
 
 class PacBalls
@@ -63,6 +65,7 @@ class Jeu : public QFrame
     int vitPacman=5;// la vitesse maximale est de 10
     Direction dirPacman;
     bool invincible=false;
+    QTimer *timerInvincible;//timer qui gère les collisions
     bool finJeu=false;
     std::list<Fantome> fantomes;
     std::list<PacBalls> list_pacballs;

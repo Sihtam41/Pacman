@@ -52,8 +52,6 @@ void PacmanWindow::paintEvent(QPaintEvent *)
     QPainter pixmapPainter(&pixmap);
     pixmapPainter.drawImage(0, 0, image);
 
-    // Enregistrer le pixmap dans un fichier
-    //pixmap.save("image.png");
 
     // Afficher l'image dans le widget
     QPainter widgetPainter(this);
@@ -205,7 +203,7 @@ bool PacmanWindow::afficheJeu(QPainter* painter)
     for (itFantome=fantomes.begin(); itFantome!=fantomes.end(); itFantome++)
     {
         QPixmap pixmapFanome;
-        switch (itFantome->getComportement())
+        switch (itFantome->getComportementActuel())
         {
             {
             case TRAQUEUR:
@@ -229,7 +227,7 @@ bool PacmanWindow::afficheJeu(QPainter* painter)
     list<PacBalls> &yep = jeu.getPacBalls();
     list<PacBalls>::iterator itPacballs;
     for (itPacballs=yep.begin(); itPacballs!=yep.end(); itPacballs++)
-        painter.drawPixmap(itPacballs->getPosX()*largeurCase, (itPacballs->getPosY()+1)*hauteurCase, pixmapPacball);
+        painter->drawPixmap(itPacballs->getPosX()*largeurCase, (itPacballs->getPosY()+1)*hauteurCase, pixmapPacball);
 
     // Dessine Pacman en fonction de la direction:
     int rot;
@@ -429,6 +427,7 @@ bool PacmanWindow::initTimer()
     timerAffichage = new QTimer(this);
     connect(timerAffichage, &QTimer::timeout, this, &PacmanWindow::handleTimerAffichage);
     timerAffichage->start(timerAffichageInterval);//start du timerAffichage (ne s'arrête jamais)
+    
 }
 
 bool PacmanWindow::initFont()
@@ -485,9 +484,9 @@ bool PacmanWindow::initImages()
         exit(-1);
     }
     //image pacball
-    if (pixmapPacball.load("./data/pacBall.bmp")==false)
+    if (pixmapPacball.load("./data/pacBall.png")==false)
     {
-        cout<<"Impossible d'ouvrir pacBall.bmp"<<endl;
+        cout<<"Impossible d'ouvrir pacBall.png"<<endl;
         exit(-1);
     }
 
