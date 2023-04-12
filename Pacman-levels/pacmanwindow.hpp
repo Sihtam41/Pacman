@@ -1,8 +1,6 @@
 #ifndef PACMANWINDOW_HPP
 #define PACMANWINDOW_HPP
 
-#define NUM_LEVELS 3
-
 #include <QtCore/QtCore>
 #include <QtWidgets/QtWidgets>
 #include "jeu.hpp"
@@ -23,10 +21,11 @@ class PacmanWindow : public QFrame
     QPixmap pixmapMenuLevels;
     int imagePacman;
     EtatJeu etatJeu;
+    int levelSelected;
 
     //Boutons
     PacmanButton *btnPause, *btnFin, *btnAjoutFantome, *btnRetraitFantome;
-    PacmanButton *btnLancerJeu, *btnQuitter, *btnLevel1, *btnLevel2;
+    PacmanButton *btnLancerJeu, *btnQuitter, *btnLevel1, *btnLevel2, *btnLevel3,*btnLevel4 ;
 
     QTimer *timerAffichage, *timerJeu;//timer
     int timerAffichageInterval=40, timerJeuInterval=20;//interval des timers
@@ -56,7 +55,10 @@ class PacmanWindow : public QFrame
     bool initMenu();// initialise le jeu
     void initMenuLevels();
 
-    void levelSelected(int level);
+    void levelSelected1();
+    void levelSelected2();
+    void levelSelected3();
+    void levelSelected4();
 
     // méthode d'affichage:
     bool afficheJeu(QPainter*);

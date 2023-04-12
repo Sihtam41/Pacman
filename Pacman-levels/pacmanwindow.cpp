@@ -324,7 +324,7 @@ bool PacmanWindow::initJeu()
 
     this->setStyleSheet("background-color: rgb(80, 80, 80);");//Couleur de fond
 
-    jeu.init(NUM_LEVELS);//Initialisation du jeu
+    jeu.init(levelSelected);//Initialisation du jeu
 
 
 
@@ -347,7 +347,7 @@ bool PacmanWindow::initMenu()
 
     this->move(100, 100);
     this->setStyleSheet("background-color: rgb(0, 0, 0);");//Couleur de fond
-    resize(976,800);
+    resize(800,494);
 
     btnPause->hide();
     btnFin->hide();
@@ -367,13 +367,13 @@ bool PacmanWindow::initBtn()
 
     //Boutons du Menu:
     btnLancerJeu = new PacmanButton("", this);
-    btnLancerJeu->setGeometry(318,401,330,110);
-    connect(btnLancerJeu, &QPushButton::clicked, this, &PacmanWindow::initJeu);
+    btnLancerJeu->setGeometry(248.4,201.8,294.3,55.5);
+    connect(btnLancerJeu, &QPushButton::clicked, this, &PacmanWindow::initMenuLevels);
     btnLancerJeu->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
     btnLancerJeu->hide();
 
     btnQuitter = new PacmanButton("", this);
-    btnQuitter->setGeometry(318,601,330,110);
+    btnQuitter->setGeometry(248.4,317.8,294.3,55.5);
     connect(btnQuitter, &QPushButton::clicked, this, &PacmanWindow::close);
     btnQuitter->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
     btnQuitter->hide();
@@ -403,6 +403,30 @@ bool PacmanWindow::initBtn()
     connect(btnFin, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
     btnFin->hide();
 
+    btnLevel1 = new PacmanButton("", this);
+    btnLevel1->setGeometry(299.3,135.5,212.3,40.1);
+    connect(btnLevel1, &QPushButton::clicked, this, &PacmanWindow::levelSelected1);
+    btnLevel1->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+    btnLevel1->hide();
+
+    btnLevel2 = new PacmanButton("", this);
+    btnLevel2->setGeometry(299.3,201.8,212.3,40.1);
+    connect(btnLevel2, &QPushButton::clicked, this, &PacmanWindow::levelSelected2);
+    btnLevel2->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+    btnLevel2->hide();
+
+    btnLevel3= new PacmanButton("", this);
+    btnLevel3->setGeometry(299.3,267.9,212.3,40.1);
+    connect(btnLevel3, &QPushButton::clicked, this, &PacmanWindow::levelSelected3);
+    btnLevel3->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+    btnLevel3->hide();
+
+    btnLevel4 = new PacmanButton("", this);
+    btnLevel4->setGeometry(299.3,333.9,212.3,40.1);
+    connect(btnLevel4, &QPushButton::clicked, this, &PacmanWindow::levelSelected4);
+    btnLevel4->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+    btnLevel4->hide();
+
     return true;
 
 }
@@ -420,8 +444,9 @@ bool PacmanWindow::initFont()
 {
     /////////////////// Charger une police depuis le fichier/////////////////////
     // Charger la police depuis le fichier
-    QString fontFile = QApplication::applicationDirPath() + "/PAC-FONT.TTF";
-    int fontId = QFontDatabase::addApplicationFont(fontFile);
+    //QString fontFile = QApplication::applicationDirPath() + "/PAC-FONT.TTF";
+
+    int fontId = QFontDatabase::addApplicationFont("./PAC-FONT.TTF");
     // Récupérer le nom de la police
     PacmanFontFile = QFontDatabase::applicationFontFamilies(fontId).at(0);
 
@@ -491,6 +516,12 @@ bool PacmanWindow::initImages()
         cout<<"Impossible d'ouvrir PacmanMenu.png"<<endl;
         exit(-1);
     }
+    if (pixmapMenuLevels.load("./data/menu_levels.png")==false)
+    {
+        cout<<"Impossible d'ouvrir PacmanMenu.png"<<endl;
+        exit(-1);
+    }
+
     return true;
 }
 
@@ -498,56 +529,36 @@ bool PacmanWindow::initImages()
 void PacmanWindow::initMenuLevels()
 {
     // Load the background image for the levels menu
-    pixmapMenuLevels = QPixmap("./data/menu_levels.png");
+    etatJeu = MENU_LEVELS;
 
     // Set the size of the window to match the size of the background image
     setFixedSize(pixmapMenuLevels.width(), pixmapMenuLevels.height());
 
-    // Create a button for each level
-    int x = 170;
-    int y = 200;
-    int buttonWidth = 70;
-    int buttonHeight = 70;
-    int spacing = 20;
-
-    for (int i = 0; i < NUM_LEVELS; i++)
-    {
-        // Create a new QPushButton
-        QPushButton* button = new QPushButton(QString::number(i + 1), this);
-
-        // Set the position and size of the button
-        button->setGeometry(x, y, buttonWidth, buttonHeight);
-
-        // Connect the button to the levelSelected() slot
-        connect(button, SIGNAL(clicked()), this, SLOT(levelSelected()));
-
-        // Increase the x position for the next button
-        x += buttonWidth + spacing;
-
-        // If we've reached the end of a row, move to the next row
-        if (x + buttonWidth > width())
-        {
-            x = 170;
-            y += buttonHeight + spacing;
-        }
-    }
+    btnLancerJeu->hide();
+    btnQuitter->hide();
+    btnLevel1->show();
+    btnLevel2->show();
+    btnLevel3->show();
+    btnLevel4->show();
 }
 
 
-void PacmanWindow::levelSelected(int level) {
-    // Set the selected level for the game
-    //jeu.setLevel(level);
+void PacmanWindow::levelSelected1() {
+    levelSelected = 0;
+    initJeu();
+}
 
-    // Start the game
-    etatJeu = PLAY;
-    jeu.init(level);
+void PacmanWindow::levelSelected2() {
+    levelSelected = 1;
+    initJeu();
+}
 
-    // Start the game timer
-    timerJeu->start();
+void PacmanWindow::levelSelected3() {
+    levelSelected = 2;
+    initJeu();
+}
 
-    // Start the display timer
-    timerAffichage->start();
-
-    // Hide the level selection menu
-   // menuLevels->hide();
+void PacmanWindow::levelSelected4() {
+    levelSelected = 3;
+    initJeu();
 }
