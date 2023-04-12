@@ -89,30 +89,17 @@ Jeu &Jeu::operator=(const Jeu &jeu)
     return *this;
 }
 
-bool Jeu::init()
+bool Jeu::init(int levelNum)
 {
 	int x, y;
 	list<Fantome>::iterator itFantome;
 	list<PacBalls>::iterator itPacballs;
 
-	/*const char terrain_defaut[15][21] = {
-		"####################",
-		"#........##........#",
-		"#.#####..##...####.#",
-		"#.....#..##........#",
-		"#..##.#............#",
-		"#...........#......#",
-		"#......#...##......#",
-		"#####..#....#..#####",
-		"#......##...#......#",
-		"#......#....#......#",
-		"#..................#",
-		"#..................#",
-		"#.....#......#.....#",
-		"#.....#......#.....#",
-        "####################"
-    };*/
-    const char terrain_defaut[15][22] = {
+    const char* terrain_defaut[15] = {};
+    //Level 1
+	if(levelNum == 0)
+    {
+    static const char temp_defaut[15][22] = {
             "#####################",
             "..........#.........#",
             "#.###.###.#.###.###.#",
@@ -129,36 +116,116 @@ bool Jeu::init()
             "#....................",
             "#####################"
         };
-        //on définit l'entrée et la sortie des deux portails
+        for(int i=0; i<15; i++) 
+            terrain_defaut[i] = temp_defaut[i];
+
+    //on définit l'entrée et la sortie des deux portails
 
 
-        portail.resize(2);//définit le nombre de fantomes au lacement du niveau
-        portail.push_back({-1,1,20,13});
-        portail.push_back({21,13,0,1});
-
-        //Portail[1] = {20,1};
-       /* const char terrain_defaut[15][22] = {
-        "#####################",
-        "#.............#.....#",
-        "#.#.###.###.#.#..##.#",
-        "#.#.#...#...#.##.#..#",
-        "#.#.#.###.#.#.##.#.##",
-        "#.........#.#....#.##",
-        "#####.#.#.#.#.#.#...#",
-        "#.....#.#.#.#.#.#.#.#",
-        "#####.#...#.#.#.#.#.#",
-        "#.....#.###.........#",
-        "#.#####.#.#.#.##.##.#",
-        "#.......#.#.#.##....#",
-        "#.#####.#.#.#.##.##.#",
-        "#.#.................#",
-        "#####################"
-
-    };*/
+    portail.resize(2);//définit le nombre de téléportation au lacement du niveau
+    portail.push_back({-1,1,20,13});
+    portail.push_back({21,13,0,1});
 
 
 	largeur = 21;
 	hauteur = 15;
+    }   
+
+     ////Level 2
+    if(levelNum == 1)
+    {
+        static const char temp_defaut[15][22] = {
+            "#####################",
+            "#....................",
+            "#.#...#...#.#...#...#",
+            "#.#.#.#.#.#.#.#.#.#.#",
+            "#...................#",
+            "#.#.#.#.#.#.#.#.#.#.#",
+            "#.#.#.#.#.#.#.#.#.#.#",
+            "#...................#",
+            "#.#.#.#.#.#.#.#...#.#",
+            "#.#.#.#.#.#.#.#...#.#",
+            "#...................#",
+            "#.#...#.#.#.#.#.#.#.#",
+            "#.#...#.#.#.#.#.#.#.#",
+            "....................#",
+            "#####################"
+        };
+
+        for(int i=0; i<15; i++) 
+            terrain_defaut[i] = temp_defaut[i];
+
+        portail.resize(2);
+        portail.push_back({21,1,0,13});
+        portail.push_back({-1,13,20,1});
+
+        largeur = 21;
+        hauteur = 15;
+    }
+        //Level 3
+    if(levelNum == 2)
+    {
+        static const char temp_defaut[15][22] = {
+            "#####################",
+            "..........#.........#",
+            "#.##.#.#######.#.##.#",
+            "#....#....#....#....#",
+            "###..####.#.####..###",
+            "#.......#.#.#.......#",
+            "###..####.#.####..###",
+            "#....#.........#....#",
+            "#.##.#.#######.#.##.#",
+            "#..#.............#..#",
+            "##..##.#########.#.##",
+            "#.........#.........#",
+            "#.#######.#.#######.#",
+            "#....................",
+            "#####################"
+        };
+
+        for(int i=0; i<15; i++) 
+            terrain_defaut[i] = temp_defaut[i];
+
+        portail.resize(2);
+        portail.push_back({-1,1,20,13});
+        portail.push_back({21,13,0,1});
+
+        largeur = 21;
+        hauteur = 15;
+    }
+    //Level 4
+    if(levelNum == 3)
+    {
+        static const char temp_defaut[15][22] = {
+            "#####################",
+            "..........#..........",
+            "#.###.###.#.###.###.#",
+            "#...................#",
+            "#.##.##.#####.##.##.#",
+            "#.##.##.#...#.##.##.#",
+            "#.......##-##.......#",
+            "#######.......#######",
+            "#.......#####.......#",
+            "#.##.##.#...#.##.##.#",
+            "#.##.##.#.#.#.##.##.#",
+            "#...................#",
+            "#.#####.#####.#######",
+            ".....................",
+            "#####################"
+        };
+
+        for(int i=0; i<15; i++) 
+            terrain_defaut[i] = temp_defaut[i];
+
+        portail.resize(4);//définit le nombre de téléportation au lacement du niveau
+        portail.push_back({-1,1,20,13});
+        portail.push_back({21,13,0,1});
+        portail.push_back({21,1,0,13});
+        portail.push_back({-1,13,20,1});
+
+        largeur = 21;
+        hauteur = 15;
+    }
 
 	terrain = new Case[largeur*hauteur];
 
@@ -174,7 +241,7 @@ bool Jeu::init()
             else
             {
                 terrain[y*largeur+x] = VIDE;
-                Balls ball;
+                Balls ball;//création des boules à ramasser
                 ball.posX=x;
                 ball.posY=y;
                 list_balls.push_back(ball);
@@ -196,7 +263,7 @@ bool Jeu::init()
         do {
             x = rand()%largeur;
             y = rand()%hauteur;
-        } while (terrain[y*largeur+x]!=VIDE);// on vérifie que le fantome n'apparaisse pas dans un mur
+        } while ((terrain[y*largeur+x]!=VIDE) || (Distance(x,y,posPacmanX,posPacmanY)<5));// on vérifie que le fantome n'apparaisse pas dans un mur
 
         itFantome->posX = x;
         itFantome->posY = y;
@@ -727,7 +794,29 @@ void Jeu::ArretInvincibilite()
         itFantome->comportementActuel=itFantome->comportement;
     }
 }
+bool Jeu::NiveauFini()
+{
+    if (list_balls.empty())
+    {
+        return true;
+    }
+    else
+        return false;
+}
+void Jeu::reset()
+{
 
+    //on remet les pacballs et les balls
+    list_pacballs.clear();
+    list_balls.clear();
+    fantomes.clear();
+
+    //on remet le score à 0
+    score=0;
+    finJeu=false;
+
+
+}
 
 int Jeu::getScore() const
 {

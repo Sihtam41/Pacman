@@ -95,7 +95,8 @@ class Jeu : public QFrame
 
     Jeu &operator=(const Jeu &);
 
-    bool init();
+    bool init(int);
+    void reset();
     void evolue();
 
     // Retourne les dimensions (en nombre de cases)
@@ -109,6 +110,7 @@ class Jeu : public QFrame
     void setDirPacman(Direction);
 
     bool getFin();
+    bool NiveauFini();
 
     // Retourne la case � une position donn�e
     Case getCase(int, int) const;

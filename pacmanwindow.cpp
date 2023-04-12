@@ -46,6 +46,10 @@ void PacmanWindow::paintEvent(QPaintEvent *)
     {
         affichageMenu(&painter);
     }
+    else if (etatJeu == MENU_LEVELS)
+    {
+        painter.drawPixmap(0, 0, pixmapMenuLevels);
+    }
 
     // Créer un QPixmap et dessiner l'image sur le pixmap
     QPixmap pixmap(size());
@@ -91,6 +95,8 @@ void PacmanWindow::handleTimerJeu()
 
     if (jeu.getFin()==true)
         finDeJeu();
+    else if (jeu.NiveauFini()==true)
+        NiveauSuivant();
 
 }
 
@@ -104,6 +110,7 @@ void PacmanWindow::finDeJeu(){
     QTimer::singleShot(3000, this, initMenu);
     etatJeu = FIN;
     timerJeu->stop();
+    jeu.reset();
     animation=false;
     update();
 }
@@ -335,14 +342,17 @@ bool PacmanWindow::initJeu()
     btnRetraitFantome->show();
     btnPause->show();
     btnFin->show();
-    btnQuitter->hide();
-    btnLancerJeu->hide();
+    btnLevel1->hide();
+    btnLevel2->hide();
+    btnLevel3->hide();
+    btnLevel4->hide();
 
 
 
     this->setStyleSheet("background-color: rgb(80, 80, 80);");//Couleur de fond
-
-    jeu.init();//Initialisation du jeu
+    
+    jeu.init(levelSelected);//Initialisation du jeu
+    cout << "Niveau : " <<levelSelected+1<< endl;
 
 
 
@@ -350,9 +360,8 @@ bool PacmanWindow::initJeu()
     int largeurCase = pixmapMur.width();
     int hauteurCase = pixmapMur.height();
 
-    resize(jeu.getNbCasesX()*largeurCase, jeu.getNbCasesY()*(hauteurCase+2));//redimensionne la fenetre
-
-     QTimer::singleShot(2000, this, lancerTimerJeu); // lance le timer Jeu  après 2s
+    resize(jeu.getNbCasesX()*largeurCase,(jeu.getNbCasesY()+1)*hauteurCase);//redimensionne la fenetre
+    QTimer::singleShot(2000, this, lancerTimerJeu); // lance le timer Jeu  après 2s
 
    
 
@@ -367,7 +376,7 @@ bool PacmanWindow::initLabel()
 
     AffichageScore = new QLabel(this);
     AffichageScore->setText("score :");
-    AffichageScore->setGeometry(360, 2.5, 150, hauteurCase-5);
+    AffichageScore->setGeometry(310, 2.5, 50, hauteurCase-5);
     AffichageScore->setStyleSheet("color : white");
     AffichageScore->setFont(font);
 
@@ -377,7 +386,7 @@ bool PacmanWindow::initLabel()
 
     valeurScore = new QLabel(this);
     valeurScore->setText("0");
-    valeurScore->setGeometry(430, 2.5, 50, hauteurCase-5);
+    valeurScore->setGeometry(360, 2.5, 50, hauteurCase-5);
     valeurScore->setStyleSheet("color : white");
     valeurScore->setFont(font);
 }
@@ -387,7 +396,7 @@ bool PacmanWindow::initMenu()
 
     this->move(100, 100);
     this->setStyleSheet("background-color: rgb(0, 0, 0);");//Couleur de fond
-    resize(976,800);
+    resize(800,494);
 
     btnPause->hide();
     btnFin->hide();
@@ -395,10 +404,6 @@ bool PacmanWindow::initMenu()
     btnRetraitFantome->hide();
     btnLancerJeu->show();
     btnQuitter->show();
-
-  
-
-
 
 
     return true;
@@ -410,41 +415,66 @@ bool PacmanWindow::initBtn()
 
     //Boutons du Menu:
     btnLancerJeu = new PacmanButton("", this);
-    btnLancerJeu->setGeometry(318,401,330,110);
-    connect(btnLancerJeu, &QPushButton::clicked, this, &PacmanWindow::initJeu);
+    btnLancerJeu->setGeometry(248.4,201.8,294.3,55.5);
+    connect(btnLancerJeu, &QPushButton::clicked, this, &PacmanWindow::initMenuLevels);
     btnLancerJeu->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
     btnLancerJeu->hide();
 
     btnQuitter = new PacmanButton("", this);
-    btnQuitter->setGeometry(318,601,330,110);
+    btnQuitter->setGeometry(248.4,317.8,294.3,55.5);
     connect(btnQuitter, &QPushButton::clicked, this, &PacmanWindow::close);
     btnQuitter->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
     btnQuitter->hide();
 
     //Boutons du Jeu:
-    btnAjoutFantome = new PacmanButton("Ajout de fantome",this);
-    btnAjoutFantome->setGeometry(10,2.5,150,32-5);
-    btnAjoutFantome->setStyleSheet("background-color: white");
+    btnAjoutFantome = new PacmanButton("",this);
+    btnAjoutFantome->setGeometry(10,2.5,75,32-5);
+    btnAjoutFantome->setStyleSheet("background-image:url(./data/boutons/ajoutFantome.png);");
     btnAjoutFantome->hide();
     connect(btnAjoutFantome, &QPushButton::clicked, this, &PacmanWindow::ajoutFantome);
 
-    btnRetraitFantome = new PacmanButton("Retrait de fantome",this);
-    btnRetraitFantome->setGeometry(170,2.5,150,32-5);
-    btnRetraitFantome->setStyleSheet("background-color: white");
+    btnRetraitFantome = new PacmanButton("",this);
+    btnRetraitFantome->setGeometry(110,2.5,75,32-5);
+    btnRetraitFantome->setStyleSheet("background-image:url(./data/boutons/retraitFantome.png);");
     connect(btnRetraitFantome, &QPushButton::clicked, this, &PacmanWindow::retraitFantome);
     btnRetraitFantome->hide();
 
-    btnPause = new PacmanButton("Pause",this);
-    btnPause->setGeometry(330,2.5,150,32-5);
-    btnPause->setStyleSheet("background-color: white");
+    btnPause = new PacmanButton("",this);
+    btnPause->setGeometry(475,2.5,75,32-5);
+    btnPause->setStyleSheet("background-image:url(./data/boutons/pause.png);");
     connect(btnPause, &QPushButton::clicked, this, &PacmanWindow::Pause);
     btnPause->hide();
 
-    btnFin = new PacmanButton("Fin",this);
-    btnFin->setGeometry(500,2.5,150,32-5);
-    btnFin->setStyleSheet("background-color: white");
+    btnFin = new PacmanButton("",this);
+    btnFin->setGeometry(575,2.5,75,32-5);
+    btnFin->setStyleSheet("background-image:url(./data/boutons/sortie.png);");
     connect(btnFin, &QPushButton::clicked, this, &PacmanWindow::finDeJeu);
     btnFin->hide();
+
+    //boutons de selection de niveau
+    btnLevel1 = new PacmanButton("", this);
+    btnLevel1->setGeometry(299.3,135.5,212.3,40.1);
+    connect(btnLevel1, &QPushButton::clicked, this, &PacmanWindow::levelSelected1);
+    btnLevel1->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+    btnLevel1->hide();
+
+    btnLevel2 = new PacmanButton("", this);
+    btnLevel2->setGeometry(299.3,201.8,212.3,40.1);
+    connect(btnLevel2, &QPushButton::clicked, this, &PacmanWindow::levelSelected2);
+    btnLevel2->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+    btnLevel2->hide();
+
+    btnLevel3= new PacmanButton("", this);
+    btnLevel3->setGeometry(299.3,267.9,212.3,40.1);
+    connect(btnLevel3, &QPushButton::clicked, this, &PacmanWindow::levelSelected3);
+    btnLevel3->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+    btnLevel3->hide();
+
+    btnLevel4 = new PacmanButton("", this);
+    btnLevel4->setGeometry(299.3,333.9,212.3,40.1);
+    connect(btnLevel4, &QPushButton::clicked, this, &PacmanWindow::levelSelected4);
+    btnLevel4->setStyleSheet("background-color: rgba(0,0,0,0); border: none;");
+    btnLevel4->hide();
 
     return true;
 
@@ -542,7 +572,28 @@ bool PacmanWindow::initImages()
         cout<<"Impossible d'ouvrir PacmanMenu.png"<<endl;
         exit(-1);
     }
+    if (pixmapMenuLevels.load("./data/menu_levels.png")==false)
+    {
+        cout<<"Impossible d'ouvrir menu_levels.png"<<endl;
+        exit(-1);
+    }
     return true;
+}
+
+void PacmanWindow::initMenuLevels()
+{
+    // Load the background image for the levels menu
+    etatJeu = MENU_LEVELS;
+
+    // Set the size of the window to match the size of the background image
+    resize(pixmapMenuLevels.width(), pixmapMenuLevels.height());
+
+    btnLancerJeu->hide();
+    btnQuitter->hide();
+    btnLevel1->show();
+    btnLevel2->show();
+    btnLevel3->show();
+    btnLevel4->show();
 }
 
 void PacmanWindow::ActualiserScore()
@@ -551,5 +602,42 @@ void PacmanWindow::ActualiserScore()
 
 }
 
+//Selection des niveaux :
+void PacmanWindow::levelSelected1() {
+    levelSelected = 0;
+    initJeu();
+}
+
+void PacmanWindow::levelSelected2() {
+    levelSelected = 1;
+    initJeu();
+}
+
+void PacmanWindow::levelSelected3() {
+    levelSelected = 2;
+    initJeu();
+}
+
+void PacmanWindow::levelSelected4() {
+    levelSelected = 3;
+    initJeu();
+}
+void PacmanWindow::NiveauSuivant()
+{
+    if(levelSelected <= 2)
+    {
+        cout << "Niveau suivant" << endl;
+        levelSelected++;
+        timerJeu->stop();
+        jeu.reset();
+        animation=false;
+        initJeu();
+    }
+    else if(levelSelected > 2)
+    {
+        cout << "Vous avez finit le Jeu Bravo" << endl;
+        finDeJeu();
+    }
+}
 
 

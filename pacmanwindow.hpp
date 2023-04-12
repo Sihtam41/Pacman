@@ -5,7 +5,7 @@
 #include <QtWidgets/QtWidgets>
 #include "jeu.hpp"
 
-typedef enum {FIN, PAUSE, PLAY, MENU} EtatJeu;
+typedef enum {FIN, PAUSE, PLAY, MENU,MENU_LEVELS} EtatJeu;
 
 class PacmanButton;
 
@@ -19,12 +19,14 @@ class PacmanWindow : public QFrame
     QPixmap pixmapJeu;
     QPixmap pixmapPacball, pixmapBall;
     QPixmap pixmapMenu;
+    QPixmap pixmapMenuLevels;
     int imagePacman;
     EtatJeu etatJeu;
+    int levelSelected;
 
     //Boutons
     PacmanButton *btnPause, *btnFin, *btnAjoutFantome, *btnRetraitFantome;
-    PacmanButton *btnLancerJeu, *btnQuitter;
+    PacmanButton *btnLancerJeu, *btnQuitter, *btnLevel1, *btnLevel2, *btnLevel3,*btnLevel4;
 
     QTimer *timerAffichage, *timerJeu;//timer
     int timerAffichageInterval=40, timerJeuInterval=20;//interval des timers
@@ -37,7 +39,7 @@ class PacmanWindow : public QFrame
   public:
     PacmanWindow(QWidget *pParent=0, Qt::WindowFlags flags=Qt::WindowFlags());
     //méthodes de gestion des timers:
-    void handleTimerJeu();
+    void handleTimerJeu();//Méthode qui gère ce qui se passe à chaque tick du timerJeu
     void handleTimerAffichage();
     void lancerTimerJeu();
 
@@ -53,8 +55,16 @@ class PacmanWindow : public QFrame
     bool initImages();// initialise les images
     bool initTimer();// initialise les timers
     bool initFont();// initialise la police
-    bool initMenu();// initialise le jeu
+    bool initMenu();// initialise le menu
     bool initLabel();// initialise les labels
+    void initMenuLevels();// initialise le menu de choix de niveaux
+
+    // méthodes de gestion des boutons qui permettent de choisir le niveau
+    void levelSelected1();
+    void levelSelected2();
+    void levelSelected3();
+    void levelSelected4();
+    void NiveauSuivant();
 
     // méthode d'affichage:
     bool afficheJeu(QPainter*);
