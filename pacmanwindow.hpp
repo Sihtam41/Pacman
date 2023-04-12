@@ -13,11 +13,11 @@ class PacmanWindow : public QFrame
 {
   protected:
     Jeu jeu;
-    QPixmap  pixmapMur, pixmapVide;
+    QPixmap pixmapMur, pixmapVide;
     QPixmap pixmapPacman [4];
     QPixmap pixmapFantomeRouge, pixmapFantomeCyan, pixmapFantomeOrange, pixmapFantomeFuyard;
     QPixmap pixmapJeu;
-    QPixmap pixmapPacball;
+    QPixmap pixmapPacball, pixmapBall;
     QPixmap pixmapMenu;
     int imagePacman;
     EtatJeu etatJeu;
@@ -54,6 +54,7 @@ class PacmanWindow : public QFrame
     bool initTimer();// initialise les timers
     bool initFont();// initialise la police
     bool initMenu();// initialise le jeu
+    bool initLabel();// initialise les labels
 
     // méthode d'affichage:
     bool afficheJeu(QPainter*);

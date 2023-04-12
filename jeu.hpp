@@ -55,6 +55,19 @@ class PacBalls
         int getPosY() const;
 };
 
+class Balls
+{
+    friend class Jeu;
+
+    protected:
+        int posX, posY;
+
+    public:
+        Balls();
+        int getPosX() const;
+        int getPosY() const;
+};
+
 class Jeu : public QFrame
 {
   protected:
@@ -69,6 +82,7 @@ class Jeu : public QFrame
     bool finJeu=false;
     std::list<Fantome> fantomes;
     std::list<PacBalls> list_pacballs;
+    std::list<Balls> list_balls;
     int score=0; 
     uint32_t Frame=0;//définit le nombre de Frame écoulé depuis le début du cycle (sert à définir la vitesse)
 
@@ -103,6 +117,8 @@ class Jeu : public QFrame
     const std::list<Fantome> &getFantomes() const;
     //liste des pacballs
     std::list<PacBalls> &getPacBalls();
+    //liste des balls
+    std::list<Balls> &getBalls();
     //Distance entre deux points
     float Distance(int, int, int, int);
     // Indique si la case � une position donn�e existe et est vide
@@ -125,6 +141,8 @@ class Jeu : public QFrame
     
     //Test la collision entre le pacman et les pacballs
     void collisionPacballs();
+    //Test la collision entre le pacman et les balls
+    void collisionBalls();
     void ArretInvincibilite();
     bool getInvincibilite() const;
 

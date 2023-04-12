@@ -172,7 +172,13 @@ bool Jeu::init()
                 generator.addCollision({x, y});//ajoute les murs au terrain pour l'algo Astar
             }
             else
+            {
                 terrain[y*largeur+x] = VIDE;
+                Balls ball;
+                ball.posX=x;
+                ball.posY=y;
+                list_balls.push_back(ball);
+            }
 
     do {
         x = rand()%largeur;
@@ -449,6 +455,7 @@ void Jeu::evolue()
 
     deplacePacman(dirPacman);
     collisionPacballs();
+    collisionBalls();
     finJeu=colisionPacmanFantome();
 }
 //Note: les colision ne sont pas parfaite car si le pacman et un fantome se colle et ensuite qu'ils vont tout les deux l'un vers l'autre, alors il n'y a pas de colision
@@ -520,6 +527,12 @@ std::list<PacBalls> &Jeu::getPacBalls()
 {
     return list_pacballs;
 }
+
+std::list<Balls> &Jeu::getBalls()
+{
+    return list_balls;
+}
+
 
 bool Jeu::posValide(int x, int y) const
 {
@@ -638,6 +651,22 @@ int PacBalls::getPosY() const
     return posY;
 }
 
+Balls::Balls()
+{
+    posX=0;
+    posY=0;
+}
+
+int Balls::getPosX() const
+{
+    return posX;
+}
+
+int Balls::getPosY() const
+{
+    return posY;
+}
+
 void Jeu::collisionPacballs()
 {
 	list<PacBalls>::iterator itPacballs;
@@ -666,6 +695,21 @@ void Jeu::collisionPacballs()
         }
     }
 
+}
+
+void Jeu::collisionBalls()
+{
+    list<Balls>::iterator itBalls;
+
+    for (itBalls=list_balls.begin(); itBalls!=list_balls.end(); itBalls++)
+    {
+        if ((itBalls->posX == posPacmanX) && (itBalls->posY == posPacmanY))
+        {
+            //Quand on mange une PacBalls, on est invincible pendant 10s, on ne peut pas manger d'autre pacballs si on est déjà invincible.
+            list_balls.erase(itBalls);
+            score+=5;
+        }
+    }
 }
 
 void Jeu::ArretInvincibilite()

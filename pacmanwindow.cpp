@@ -11,6 +11,7 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     initBtn();
     initTimer();
     initMenu();
+    initLabel();
 
     setWindowTitle("Pacman");//Titre de la fenêtre
 
@@ -43,7 +44,7 @@ void PacmanWindow::paintEvent(QPaintEvent *)
     }
     else if(etatJeu==MENU)
     {
-        painter.drawPixmap(0,0,pixmapMenu);
+        affichageMenu(&painter);
     }
 
     // Créer un QPixmap et dessiner l'image sur le pixmap
@@ -86,6 +87,7 @@ void PacmanWindow::keyPressEvent(QKeyEvent *event)
 void PacmanWindow::handleTimerJeu()
 {
     jeu.evolue();
+    ActualiserScore();
 
     if (jeu.getFin()==true)
         finDeJeu();
@@ -196,7 +198,13 @@ bool PacmanWindow::afficheJeu(QPainter* painter)
                 painter->drawPixmap(x*largeurCase, (y+1)*hauteurCase, pixmapMur);
             else if (jeu.getCase(x,y)==VIDE)
                 painter->drawPixmap(x*largeurCase, (y+1)*hauteurCase, pixmapVide);
-
+    //dessine les balls
+    const list<Balls> &balls = jeu.getBalls();
+    list<Balls>::const_iterator itBalls;
+    for (itBalls=balls.begin(); itBalls!=balls.end(); itBalls++)
+    {
+            painter->drawPixmap(itBalls->getPosX()*largeurCase, (itBalls->getPosY()+1)*hauteurCase, pixmapBall);
+    }
     // Dessine les fantomes
     const list<Fantome> &fantomes = jeu.getFantomes();
     list<Fantome>::const_iterator itFantome;
@@ -267,6 +275,8 @@ bool PacmanWindow::affichageFin(QPainter* painter)
         btnRetraitFantome->hide();
         btnPause->hide();
         btnFin->hide();
+
+
     }
 
     // on change le fond et on écrit le texte final
@@ -303,6 +313,12 @@ bool PacmanWindow::affichagePause(QPainter* painter)
     painter->drawText(rectangle, Qt::AlignCenter, tr("PAUSE"));
 }
 
+bool PacmanWindow::affichageMenu(QPainter* painter)
+{
+    painter->drawPixmap(0,0,pixmapMenu);
+
+}
+
 
 
 
@@ -322,6 +338,8 @@ bool PacmanWindow::initJeu()
     btnQuitter->hide();
     btnLancerJeu->hide();
 
+
+
     this->setStyleSheet("background-color: rgb(80, 80, 80);");//Couleur de fond
 
     jeu.init();//Initialisation du jeu
@@ -336,7 +354,15 @@ bool PacmanWindow::initJeu()
 
      QTimer::singleShot(2000, this, lancerTimerJeu); // lance le timer Jeu  après 2s
 
+   
+
+    return true;
+}
+
+bool PacmanWindow::initLabel()
+{
     //affichage du score
+    int hauteurCase = pixmapMur.height();
     QFont font("Times", 9, QFont::Bold);
 
     AffichageScore = new QLabel(this);
@@ -345,15 +371,16 @@ bool PacmanWindow::initJeu()
     AffichageScore->setStyleSheet("color : white");
     AffichageScore->setFont(font);
 
+
+    
+
+
     valeurScore = new QLabel(this);
     valeurScore->setText("0");
-    valeurScore->setGeometry(430, 2.5, 150, hauteurCase-5);
+    valeurScore->setGeometry(430, 2.5, 50, hauteurCase-5);
     valeurScore->setStyleSheet("color : white");
     valeurScore->setFont(font);
-
-    return true;
 }
-
 bool PacmanWindow::initMenu()
 {
     etatJeu = MENU;
@@ -368,6 +395,9 @@ bool PacmanWindow::initMenu()
     btnRetraitFantome->hide();
     btnLancerJeu->show();
     btnQuitter->show();
+
+  
+
 
 
 
@@ -487,6 +517,12 @@ bool PacmanWindow::initImages()
     if (pixmapPacball.load("./data/pacBall.png")==false)
     {
         cout<<"Impossible d'ouvrir pacBall.png"<<endl;
+        exit(-1);
+    }
+
+        if (pixmapBall.load("./data/ball.png")==false)
+    {
+        cout<<"Impossible d'ouvrir Ball.png"<<endl;
         exit(-1);
     }
 
