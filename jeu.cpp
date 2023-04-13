@@ -690,7 +690,7 @@ void Jeu::AjoutFantome()
     do {
             x = rand()%largeur;
             y = rand()%hauteur;
-        } while (terrain[y*largeur+x]!=VIDE);
+        } while ((terrain[y*largeur+x]!=VIDE) || (Distance(x,y,posPacmanX,posPacmanY)<5));
 
     newFantome.posX = x;
     newFantome.posY = y;
@@ -810,6 +810,7 @@ void Jeu::reset()
     list_pacballs.clear();
     list_balls.clear();
     fantomes.clear();
+    generator.clearCollisions();
 
     //on remet le score à 0
     score=0;

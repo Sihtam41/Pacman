@@ -175,6 +175,9 @@ void PacmanWindow::lancerTimerJeu()
 {
     timerJeu->start(timerJeuInterval);
     animation=true;
+    //cache les boutons au début car sinon l'utilisateur peut cliquer dessus avant le début du jeu
+    btnPause->show();
+    btnFin->show();
 }
 
 PacmanButton::PacmanButton(const QString &text, QWidget *parent) : QPushButton(text,parent)
@@ -340,8 +343,6 @@ bool PacmanWindow::initJeu()
     //affichage des boutons
     btnAjoutFantome->show();
     btnRetraitFantome->show();
-    btnPause->show();
-    btnFin->show();
     btnLevel1->hide();
     btnLevel2->hide();
     btnLevel3->hide();
