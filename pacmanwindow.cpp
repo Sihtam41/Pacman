@@ -11,7 +11,6 @@ PacmanWindow::PacmanWindow(QWidget *pParent, Qt::WindowFlags flags):QFrame(pPare
     initBtn();
     initTimer();
     initMenu();
-    initLabel();
 
     setWindowTitle("Pacman");//Titre de la fenêtre
 
@@ -32,10 +31,21 @@ void PacmanWindow::paintEvent(QPaintEvent *)
     if (etatJeu==PLAY)
     {
         afficheJeu(&painter);//affiche du jeu
+
+        //affichage du score
+        painter.setPen(Qt::white); // Définition de la couleur de dessin en blanc
+        painter.setFont(QFont("Times", 10, QFont::Bold)); // Définition de la police d'écriture
+        QRectF textRect = QRectF(0, 5, this->width(), 30); // Définition du rectangle dans lequel écrire le texte
+        painter.drawText(textRect, Qt::AlignHCenter | Qt::AlignTop, tr("score: %1").arg(jeu.getScore()));
+
     }
     else if (etatJeu == FIN)//affichage fin du jeu
     {
-        affichageFin(&painter);
+        painter.drawPixmap(0, 0, pixmapFin);
+    }
+    else if (etatJeu == GAGNER)//affichage fin du jeu lorsque le joueur a gagné
+    {
+        painter.drawPixmap(0, 0, pixmapGagner);
     }
     else if(etatJeu==PAUSE)
     {
@@ -91,7 +101,6 @@ void PacmanWindow::keyPressEvent(QKeyEvent *event)
 void PacmanWindow::handleTimerJeu()
 {
     jeu.evolue();
-    ActualiserScore();
 
     if (jeu.getFin()==true)
         finDeJeu();
@@ -112,7 +121,14 @@ void PacmanWindow::finDeJeu(){
     timerJeu->stop();
     jeu.reset();
     animation=false;
-    update();
+
+    btnAjoutFantome->hide();
+    btnRetraitFantome->hide();
+    btnPause->hide();
+    btnFin->hide();
+
+    resize(pixmapMenuLevels.width(), pixmapMenuLevels.height());//redimensionne la fenêtre au menu
+
 }
 
 void PacmanWindow::Pause(){
@@ -278,17 +294,6 @@ bool PacmanWindow::afficheJeu(QPainter* painter)
 bool PacmanWindow::affichageFin(QPainter* painter)
 {
 
-    //On cache les boutons
-    if (btnAjoutFantome!= nullptr)
-    {
-        btnAjoutFantome->hide();
-        btnRetraitFantome->hide();
-        btnPause->hide();
-        btnFin->hide();
-
-
-    }
-
     // on change le fond et on écrit le texte final
     this->setStyleSheet("background-color: rgb(153, 115, 0);");//change la couleur du fond
     painter->setFont(QFont(PacmanFontFile, 50));
@@ -369,28 +374,7 @@ bool PacmanWindow::initJeu()
     return true;
 }
 
-bool PacmanWindow::initLabel()
-{
-    //affichage du score
-    int hauteurCase = pixmapMur.height();
-    QFont font("Times", 9, QFont::Bold);
 
-    AffichageScore = new QLabel(this);
-    AffichageScore->setText("score :");
-    AffichageScore->setGeometry(310, 2.5, 50, hauteurCase-5);
-    AffichageScore->setStyleSheet("color : white");
-    AffichageScore->setFont(font);
-
-
-    
-
-
-    valeurScore = new QLabel(this);
-    valeurScore->setText("0");
-    valeurScore->setGeometry(360, 2.5, 50, hauteurCase-5);
-    valeurScore->setStyleSheet("color : white");
-    valeurScore->setFont(font);
-}
 bool PacmanWindow::initMenu()
 {
     etatJeu = MENU;
@@ -407,6 +391,7 @@ bool PacmanWindow::initMenu()
     btnQuitter->show();
 
 
+    //AffichageScore->resize(0, 0);
     return true;
 }
 
@@ -493,7 +478,7 @@ bool PacmanWindow::initTimer()
 
 bool PacmanWindow::initFont()
 {
-    int id = QFontDatabase::addApplicationFont("./PAC-FONT.TTF");//Chargement de la police
+    int id = QFontDatabase::addApplicationFont("./data/PAC-FONT.TTF");//Chargement de la police
     PacmanFontFile = QFontDatabase::applicationFontFamilies(id).at(0);//Récupération du nom de la police
     return true;
 }
@@ -568,14 +553,24 @@ bool PacmanWindow::initImages()
         cout<<"Impossible d'ouvrir mur.bmp"<<endl;
         exit(-1);
     }
-    if (pixmapMenu.load("./data/PacmanMenu.png")==false)
+    if (pixmapMenu.load("./data/menu/PacmanMenu.png")==false)
     {
         cout<<"Impossible d'ouvrir PacmanMenu.png"<<endl;
         exit(-1);
     }
-    if (pixmapMenuLevels.load("./data/menu_levels.png")==false)
+    if (pixmapMenuLevels.load("./data/menu/menu_levels.png")==false)
     {
         cout<<"Impossible d'ouvrir menu_levels.png"<<endl;
+        exit(-1);
+    }
+    if (pixmapFin.load("./data/menu/lost.png")==false)
+    {
+        cout<<"Impossible d'ouvrir lost.png"<<endl;
+        exit(-1);
+    }
+    if (pixmapGagner.load("./data/menu/win.png")==false)
+    {
+        cout<<"Impossible d'ouvrir win.png"<<endl;
         exit(-1);
     }
     return true;
@@ -595,12 +590,7 @@ void PacmanWindow::initMenuLevels()
     btnLevel2->show();
     btnLevel3->show();
     btnLevel4->show();
-}
-
-void PacmanWindow::ActualiserScore()
-{
-    valeurScore->setText(QString::number(jeu.getScore()));
-
+    
 }
 
 //Selection des niveaux :
@@ -638,6 +628,7 @@ void PacmanWindow::NiveauSuivant()
     {
         cout << "Vous avez finit le Jeu Bravo" << endl;
         finDeJeu();
+        etatJeu=GAGNER;
     }
 }
 

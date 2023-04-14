@@ -12,17 +12,17 @@ typedef enum {GAUCHE, DROITE, HAUT, BAS} Direction;
 typedef enum {FUYARD, ALEATOIRE, OBSERVATEUR, TRAQUEUR} EtatFantome;
 
 class Jeu;
-
+//structure qui définit une coordonnée
 typedef struct Coord {
     int x;
     int y;
 }Coord;
-
+//structure qui définit un portail
 typedef struct Portail {
     Coord Entree;
     Coord Sortie;
 }Portail;
-
+//Classe qui définit un fantome
 class Fantome
 {
     friend class Jeu;
@@ -37,7 +37,7 @@ class Fantome
     Fantome();
     int getPosX() const;
     int getPosY() const;
-    int vitFantome=4;// la vitesse maximale est de 10
+    int vitFantome=2;// la vitesse maximale est de 10
     EtatFantome getComportement() const {return comportement;}
     EtatFantome getComportementActuel() const {return comportementActuel;}
 };
@@ -75,7 +75,7 @@ class Jeu : public QFrame
     AStar::Generator generator;
     int largeur, hauteur; // Nombre de cases en largeur et en hauteur
     int posPacmanX, posPacmanY;
-    int vitPacman=5;// la vitesse maximale est de 10
+    int vitPacman=4;// la vitesse maximale est de 10
     Direction dirPacman;
     bool invincible=false;
     QTimer *timerInvincible;//timer qui gère les collisions

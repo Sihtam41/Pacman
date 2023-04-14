@@ -5,7 +5,7 @@
 #include <QtWidgets/QtWidgets>
 #include "jeu.hpp"
 
-typedef enum {FIN, PAUSE, PLAY, MENU,MENU_LEVELS} EtatJeu;
+typedef enum {FIN, GAGNER, PAUSE, PLAY, MENU , MENU_LEVELS} EtatJeu;
 
 class PacmanButton;
 
@@ -20,6 +20,8 @@ class PacmanWindow : public QFrame
     QPixmap pixmapPacball, pixmapBall;
     QPixmap pixmapMenu;
     QPixmap pixmapMenuLevels;
+    QPixmap pixmapFin;
+    QPixmap pixmapGagner;
     int imagePacman;
     EtatJeu etatJeu;
     int levelSelected;
@@ -56,7 +58,6 @@ class PacmanWindow : public QFrame
     bool initTimer();// initialise les timers
     bool initFont();// initialise la police
     bool initMenu();// initialise le menu
-    bool initLabel();// initialise les labels
     void initMenuLevels();// initialise le menu de choix de niveaux
 
     // méthodes de gestion des boutons qui permettent de choisir le niveau
@@ -72,7 +73,6 @@ class PacmanWindow : public QFrame
     bool affichageFin(QPainter*);
     bool affichageMenu(QPainter*);
 
-    void ActualiserScore();
 
     void screenShot();
 

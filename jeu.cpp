@@ -116,7 +116,7 @@ bool Jeu::init(int levelNum)
             "#....................",
             "#####################"
         };
-        for(int i=0; i<15; i++) 
+        for(int i=0; i<15; i++)
             terrain_defaut[i] = temp_defaut[i];
 
     //on définit l'entrée et la sortie des deux portails
@@ -129,7 +129,7 @@ bool Jeu::init(int levelNum)
 
 	largeur = 21;
 	hauteur = 15;
-    }   
+    }
 
      ////Level 2
     if(levelNum == 1)
@@ -152,7 +152,7 @@ bool Jeu::init(int levelNum)
             "#####################"
         };
 
-        for(int i=0; i<15; i++) 
+        for(int i=0; i<15; i++)
             terrain_defaut[i] = temp_defaut[i];
 
         portail.resize(2);
@@ -183,7 +183,7 @@ bool Jeu::init(int levelNum)
             "#####################"
         };
 
-        for(int i=0; i<15; i++) 
+        for(int i=0; i<15; i++)
             terrain_defaut[i] = temp_defaut[i];
 
         portail.resize(2);
@@ -214,7 +214,7 @@ bool Jeu::init(int levelNum)
             "#####################"
         };
 
-        for(int i=0; i<15; i++) 
+        for(int i=0; i<15; i++)
             terrain_defaut[i] = temp_defaut[i];
 
         portail.resize(4);//définit le nombre de téléportation au lacement du niveau
@@ -333,7 +333,6 @@ void Jeu::evolue()
 
                         int fX,fY;//Poisition futur
                         float  dMax=-1;
-                        int xMax,yMax;
 
                         //on test la postiion au dessus du fantomes
                         fX=x+1;
@@ -391,19 +390,19 @@ void Jeu::evolue()
                             itFantome->dir = (Direction)(rand()%4);
                            }
 
-                        
 
-                        
 
-                        
-                            
+
+
+
+
                     }
                     else if (itFantome->comportementActuel==TRAQUEUR)//Fonctionnel
                     {
                         auto path = generator.findPath({itFantome->posX,itFantome->posY}, {posPacmanX, posPacmanY});// créer le chemin
                         if (path.size()>1)// qaund il a trouvé un chemin supérieur à 1
                         {
-                            int curseurProchainDeplacement= path.size()-2;// cherche l'avant dernier case qui correspond au prochain déplacement 
+                            int curseurProchainDeplacement= path.size()-2;// cherche l'avant dernier case qui correspond au prochain déplacement
                             if (path[curseurProchainDeplacement].x>itFantome->posX)// si il doit aller à droite
                                 itFantome->dir = DROITE;
                             else if (path[curseurProchainDeplacement].x<itFantome->posX)
@@ -491,7 +490,7 @@ void Jeu::evolue()
                         }
                         else
                             PACMAN_VU = false;//le fantome n'a pas vu le pacman
-                        
+
                         if (PACMAN_VU==false)//Comme le comportenement ALEATOIRE
                         {
                             int testX2 = itFantome->posX + depX[itFantome->dir];
@@ -499,9 +498,9 @@ void Jeu::evolue()
                             if (terrain[testY2*largeur+testX2]!=VIDE)//si le fantome ne va pas sur un mur
                                 itFantome->dir = (Direction)(rand()%4);
                         }
-                            
+
                     }
-                
+
 
                 testX = itFantome->posX + depX[itFantome->dir];
                 testY = itFantome->posY + depY[itFantome->dir];
